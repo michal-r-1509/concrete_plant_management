@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Concrete Plant Management App</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<nav>
+    <p>
+        <a href="#item1">
+            <button type="button">Wysyłka</button>
+        </a>
+        <a href="#item2">
+            <button type="button">Wysyłka</button>
+        </a>
+        <a href="#item3">
+            <button type="button">Klienci</button>
+        </a>
+        <a href="#default">
+            <button type="button">Flota</button>
+        </a>
+    </p>
+</nav>
+<aside>
+    <button id="order_button">Dodaj zamówienie</button>
+    <button id="client_button">Dodaj klienta</button>
+    <button id="vehicle_button">Dodaj pojazd</button>
+</aside>
+<main>
+    <div class="items">
+        <p id="item1">... item 1...</p>
+        <p id="item2">... item 2...</p>
+        <p id="item3">...</p>
+        <p id="default">aaaa domyslbne</p>
+    </div>
+    <table id="order_table">
+        <tr class="tr_header">
+            <td>status</td>
+            <td>id zamówienia</td>
+            <td>data</td>
+            <td>godzina</td>
+            <td>ilość</td>
+            <td colspan="2">Edycja</td>
+        </tr>
+        <tr>
+            <td>false</td>
+            <td>5</td>
+            <td>2022-06-15</td>
+            <td>11:38:00</td>
+            <td>50</td>
+            <td>Edycja</td>
+            <td>Usuń</td>
+        </tr>
+    </table>
+</main>
+<footer>
+</footer>
+
+<div class="modal" id="order_modal">
+    <div class="header">
+        <div class="title">Dodaj zamówienie</div>
+        <button class="close">&times;</button>
+    </div>
+    <div class="body">
+        <form class="data_form">
+            <div class="form_block">
+                <label>Data
+                    <input type="date" id="date" pattern="[0-9]{4}-[0-9]{2}-[0-9]{2}"/>
+                </label>
+                <label>Godzina
+                    <input type="time" id="time" pattern="[0-9]{2}:[0-9]{2}"/>
+                </label>
+                <label>Adres
+                    <input type="text"/>
+                </label>
+                <label>Ilość
+                    <input type="number" id="amount"/>
+                </label>
+            </div>
+            <div>
+                <label>Klasa betonu
+                    <select>
+                        <option>C8/10</option>
+                        <option>C12/15</option>
+                        <option>C16/20</option>
+                        <option selected>C20/25</option>
+                        <option>C25/30</option>
+                        <option>C30/37</option>
+                        <option>C35/45</option>
+                        <option>C40/50</option>
+                        <option>C50/60</option>
+                    </select>
+                </label>
+                <label>Klasa ekspozycji
+                    <input type="text"/>
+                </label>
+                <label>Pompa
+                    <input type="checkbox">
+                </label>
+                <label>Opis
+                    <input type="text"/>
+                </label>
+            </div>
+        </form>
+    </div>
+    <div class="footer">
+        <button class="button close">Anuluj</button>
+        <button class="button" id="addOrder">Zapisz</button>
+    </div>
+</div>
+
+<div class="modal" id="client_modal">
+    <div class="header">
+        <div class="title">Dodaj klienta</div>
+        <button class="close">&times;</button>
+    </div>
+
+    <div class="body">
+        <form class="data_form">
+            <div class="form_block">
+                <label>Nazwa
+                    <input type="text" class="long_field" id="client_name"/>
+                </label>
+                <label>NIP
+                    <input type="text" id="nip"/>
+                </label>
+                <label>Ulica i numer
+                    <input type="text" id="street"/>
+                </label>
+            </div>
+            <div>
+                <label>Miejscowość
+                    <input type="text" id="city"/>
+                </label>
+                <label>Kod pocztowy
+                    <input type="text" id="postal_code"/>
+                </label>
+            </div>
+        </form>
+    </div>
+    <div class="footer">
+        <button class="button close">Anuluj</button>
+        <button class="button" id="addClient">Zapisz</button>
+    </div>
+</div>
+
+<div class="modal" id="vehicle_modal">
+    <div class="header">
+        <div class="title">Dodaj pojazd</div>
+        <button class="close">&times;</button>
+    </div>
+
+    <div class="body">
+        <form class="data_form">
+            <div class="form_block">
+                <label>Nazwa
+                    <input type="text" class="long_field" id="vehicle_name"/>
+                </label>
+                <label>Typ
+                    <select>
+                        <option selected>Gruszka</option>
+                        <option>Pompo-gruszka</option>
+                        <option>Pompa</option>
+                    </select>
+                </label>
+                <label>Pojemność
+                    <input type="number" id="capacity"/>
+                </label>
+            </div>
+            <div>
+                <label>Długość pompy
+                    <input type="number" id="pump_length"/>
+                </label>
+                <label>Nr rejestracyjny
+                    <input type="text" id="reg_no"/>
+                </label>
+                <label>Opis
+                    <input type="text" id="vehicle_description"/>
+                </label>
+            </div>
+        </form>
+    </div>
+    <div class="footer">
+        <button class="button close">Anuluj</button>
+        <button class="button" id="addVehicle">Zapisz</button>
+    </div>
+</div>
+
+<div id="overlay"></div>
+
+<script src="script.js" async></script>
+</body>
+</html>
