@@ -5,55 +5,96 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Concrete Plant Management App</title>
     <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500&display=swap" rel="stylesheet">
 </head>
 <body>
 <nav>
     <p>
-        <a href="#item1">
-            <button type="button">Wysyłka</button>
+        <a href="#order_table">
+            <button id="orders_tab" type="button" class="tab_button">Zamówienia</button>
         </a>
-        <a href="#item2">
-            <button type="button">Wysyłka</button>
+        <a href="#order_management_table">
+            <button id="management_tab" type="button" class="tab_button">Wysyłka</button>
         </a>
-        <a href="#item3">
-            <button type="button">Klienci</button>
+        <a href="#client_table">
+            <button id="clients_tab" type="button" class="tab_button">Klienci</button>
         </a>
-        <a href="#default">
-            <button type="button">Flota</button>
+        <a href="#vehicle_table">
+            <button id="vehicles_tab" type="button" class="tab_button">Flota</button>
         </a>
     </p>
 </nav>
-<aside>
-    <button id="order_button">Dodaj zamówienie</button>
-    <button id="client_button">Dodaj klienta</button>
-    <button id="vehicle_button">Dodaj pojazd</button>
-</aside>
 <main>
-    <div class="items">
-        <p id="item1">... item 1...</p>
-        <p id="item2">... item 2...</p>
-        <p id="item3">...</p>
-        <p id="default">aaaa domyslbne</p>
-    </div>
-    <table id="order_table">
-        <tr class="tr_header">
-            <td>status</td>
-            <td>id zamówienia</td>
-            <td>data</td>
-            <td>godzina</td>
-            <td>ilość</td>
-            <td colspan="2">Edycja</td>
-        </tr>
-        <tr>
-            <td>false</td>
-            <td>5</td>
-            <td>2022-06-15</td>
-            <td>11:38:00</td>
-            <td>50</td>
-            <td>Edycja</td>
-            <td>Usuń</td>
-        </tr>
-    </table>
+    <aside>
+        <button id="order_button">Dodaj zamówienie</button>
+        <button id="client_button">Dodaj klienta</button>
+        <button id="vehicle_button">Dodaj pojazd</button>
+    </aside>
+    <section>
+        <article>
+            <div class="tables">
+                <table id="order_table">
+                    <tr class="tr_header">
+                        <td>status</td>
+                        <td>id zamówienia</td>
+                        <td>data</td>
+                        <td>godzina</td>
+                        <td>ilość</td>
+                        <td colspan="3">Edycja</td>
+                    </tr>
+                </table>
+                <table id="order_management_table">
+                    <tr class="tr_header">
+                        <td>A</td>
+                        <td>B</td>
+                        <td>C</td>
+                        <td colspan="2">Edycja</td>
+                    </tr>
+                </table>
+                <table id="client_table">
+                    <tr class="tr_header">
+                        <td>Nazwa</td>
+                        <td>Adres</td>
+                        <td>NIP</td>
+                        <td colspan="2">Edycja</td>
+                    </tr>
+                    <tr>
+                        <td>${name}</td>
+                        <td>${streetAndNo}, ${postCode} ${city}</td>
+                        <td>${nip}</td>
+                        <td>
+                            <button class = "clientEditBtn">Edytuj</button>
+                        </td>
+                        <td>
+                            <button class = "clientDeleteBtn">Usuń</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>${name}</td>
+                        <td>${streetAndNo}, ${postCode} ${city}</td>
+                        <td>${nip}</td>
+                        <td>
+                            <button class = "clientEditBtn">Edytuj</button>
+                        </td>
+                        <td>
+                            <button class = "clientDeleteBtn">Usuń</button>
+                        </td>
+                    </tr>
+                </table>
+                <table id="vehicle_table">
+                    <tr class="tr_header">
+                        <td>Nazwa</td>
+                        <td>Typ</td>
+                        <td>Pojemność</td>
+                        <td>Długość pompy</td>
+                        <td>Nr rejestr.</td>
+                        <td>Opis</td>
+                        <td colspan="2">Edycja</td>
+                    </tr>
+                </table>
+            </div>
+        </article>
+    </section>
 </main>
 <footer>
 </footer>
@@ -113,7 +154,7 @@
 
 <div class="modal" id="client_modal">
     <div class="header">
-        <div class="title">Dodaj klienta</div>
+        <div id = "client_modal_title" class="title">Dodaj klienta</div>
         <button class="close">&times;</button>
     </div>
 
@@ -123,24 +164,24 @@
                 <label>Nazwa
                     <input type="text" class="long_field" id="client_name"/>
                 </label>
-                <label>NIP
-                    <input type="text" id="nip"/>
-                </label>
                 <label>Ulica i numer
                     <input type="text" id="street"/>
+                </label>
+                <label>Kod pocztowy
+                    <input type="text" id="post_code"/>
                 </label>
             </div>
             <div>
                 <label>Miejscowość
                     <input type="text" id="city"/>
                 </label>
-                <label>Kod pocztowy
-                    <input type="text" id="postal_code"/>
+                <label>NIP
+                    <input type="number" id="nip"/>
                 </label>
             </div>
         </form>
     </div>
-    <div class="footer">
+    <div id="client_modal_footer" class="footer">
         <button class="button close">Anuluj</button>
         <button class="button" id="addClient">Zapisz</button>
     </div>

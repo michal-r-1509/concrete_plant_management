@@ -6,6 +6,9 @@ const orderModalBtn = document.getElementById('order_button');
 const clientModalBtn = document.getElementById('client_button');
 const vehicleModalBtn = document.getElementById('vehicle_button');
 
+const clientEditBtn = document.getElementsByClassName('clientEditBtn');
+const clientDeleteBtn = document.getElementsByClassName('clientDeleteBtn');
+
 const closeButton = document.getElementsByClassName("close");
 const form = document.getElementsByClassName('data_form');
 
@@ -37,12 +40,23 @@ orderModalBtn.onclick = function () {
 clientModalBtn.onclick = function () {
     clientModal.style.display = "block";
     overlay.classList.add('active');
+    document.getElementById('client_modal_title').innerHTML = "Dodaj klienta";
 }
 
 vehicleModalBtn.onclick = function () {
     vehicleModal.style.display = "block";
     overlay.classList.add('active');
 }
+
+for (let i = 0; i < clientEditBtn.length; i++) {
+    clientEditBtn[i].onclick = function () {
+        clientModal.style.display = "block";
+        overlay.classList.add('active');
+        document.getElementById('client_modal_title').innerHTML = "Edytuj dane klienta";
+    }
+}
+
+
 
 function submitForm() {
     for (let i = 0; i < form.length; i++) {

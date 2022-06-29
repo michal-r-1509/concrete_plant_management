@@ -31,8 +31,8 @@ public class OrderService {
         return true;
     }
 
-    public Order saveOrder(Order orderToSave) {
-        Order saved = repository.save(orderToSave);
+    public Order saveOrder(Order toSave) {
+        Order saved = repository.save(toSave);
         return saved;
     }
 
