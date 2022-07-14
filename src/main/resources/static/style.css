@@ -5,8 +5,8 @@ body{
     background: rgb(33,33,56);
     background: linear-gradient(90deg, rgba(33,33,56,1) 0%, rgba(49,77,115,1) 47%, rgba(7,34,164,1) 100%);
     color: lightgray;
-    margin:0px;
-    font-size: small;
+    margin:0;
+    font-size: 10px;
     font-variant-caps: all-petite-caps;
     justify-content: center;
 }
@@ -23,6 +23,7 @@ button{
     border-radius: 15px;
     font-variant-caps: all-petite-caps;
     box-sizing: border-box;
+    transition: all .1s ease-in-out;
 }
 button:hover{
     background-color: rgba(49,77,115,1);
@@ -32,13 +33,26 @@ button:hover{
     font-weight: bold;
     background-color: rgba(7,34,164,0.8);
 }
-td button{
-    width: 80px;
-    padding: 3px;
-    font-size: 12px;
+td button {
+    width: 60px;
+    padding: 2px;
+    margin: 3px;
+    font-size: 10px;
     border: lightgray solid 1px;
     border-radius: 8px;
 }
+
+.small_buttons{
+    width: 40px;
+    height: 30px;
+    padding: 2px;
+    margin: 3px;
+    font-size: 18px;
+    /*border: lightgray solid 1px;*/
+    border-radius: 8px;
+    float: left;
+}
+
 a{
     text-decoration: none;
     cursor: default;
@@ -58,7 +72,7 @@ aside{
     padding: 10px;
     width: min-content;
 }
-section{
+section {
     float: left;
     align-items: stretch;
     padding: 10px;
@@ -72,7 +86,6 @@ article{
     border: 2px solid lightgray;
     border-radius: 15px;
     background-color: rgba(131, 137, 150, 0.5);
-
 }
 /*footer{
     height: 100px;
@@ -87,32 +100,55 @@ table{
     margin-left: auto;
     margin-right: auto;
     width: auto;
-    border: 1px solid lightgray;
     border-collapse: collapse;
     overflow-y: auto;
-    max-height: 350px;
+    max-height: 400px;
 }
 .tables{
     display: flex;
     align-items: center;
-    border: none;
 }
 .tables table{
     display: none;
 }
+
 .tables table:target{
     display: block;
 }
-.tr_header{
-    vertical-align: middle;
-    font-weight: bold;
-    font-size: small;
+
+.visible_tables{
+    padding: 10px;
+    height: 150px;
+    max-height: 150px;
+    border: 2px solid lightgray;
+    border-radius: 15px;
+    background-color: rgba(131, 137, 150, 0.5);
 }
+
+.part_table{
+    overflow-y: auto;
+    max-height: 140px;
+    inline-size: -moz-available;
+}
+
+th{
+    border: 1px solid lightgray;
+    padding: 4px;
+    min-width: 40px;
+    min-height: 25px;
+    font-size: 12px;
+}
+
+.tr_header{
+    background: linear-gradient(90deg, rgb(43, 60, 93) 0%, rgba(49,77,115,1) 47%, rgb(18, 58, 133) 100%);
+}
+
 .tr_header:hover{
     background-color: unset;
 }
 tr{
     vertical-align: middle;
+    transition: all .1s ease-in-out;
 }
 tr:hover{
     background-color: rgba(49,77,115,1);
@@ -120,27 +156,40 @@ tr:hover{
 
 td{
     text-align: center;
-    padding-left: 10px;
-    padding-right: 10px;
     border: 1px solid lightgray;
     border-collapse: collapse;
-    min-width: 70px;
+    min-width: 40px;
 }
 .modal{
+    font-size: 12px;
     display: none;
     position: fixed;
     z-index: 1;
+    margin: auto;
     background-color: rgba(49,77,115,1);
     padding: 10px;
     top: 40%;
     left: 50%;
-    transform: translate(-50%, -50%);
-    transition: 200ms ease-in-out;
     border: 3px solid lightgray;
     border-radius: 15px;
     width: 600px;
     max-width: 80%;
+    transform: translate(-50%, -50%);
+    animation-name: modal---open;
+    animation-duration: 200ms;
+    animation-fill-mode: forwards;
 }
+
+.management_form{
+    display: flex;
+    align-items: end;
+    justify-content: space-evenly;
+}
+
+.modal--close{
+    animation-name: modal---close;
+}
+
 .header{
     justify-content: space-between;
     display: flex;
@@ -166,8 +215,22 @@ td{
 }
 .footer{
     display: flex;
-    justify-content: right;
+    justify-content: space-between;
+    vertical-align: bottom;
+    align-items: end;
     padding-top: 15px;
+    width: auto;
+}
+.footer label{
+    padding: 1px;
+}
+
+.footer input{
+    max-width: 150px;
+}
+
+.footer span{
+    display: contents;
 }
 
 .modal .data_form{
@@ -185,6 +248,12 @@ label{
     padding: 5px;
 }
 
+.management_form label{
+    display: block;
+    width: auto;
+    padding: 5px;
+}
+
 #overlay{
     position: fixed;
     transition: 200ms ease-in-out;
@@ -199,4 +268,14 @@ label{
 #overlay.active{
     opacity: 1;
     pointer-events: all;
+}
+
+@keyframes modal---open {
+    from{transform: translate(-50%, -50%) scale(0.5)}
+    to{transform: translate(-50%, -50%) scale(1)}
+}
+
+@keyframes modal---close {
+    from{transform: translate(-50%, -50%) scale(1)}
+    to{transform: translate(-50%, -50%) scale(0.5)}
 }

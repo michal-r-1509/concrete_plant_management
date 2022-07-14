@@ -14,8 +14,8 @@ public class OrderService {
 
     public boolean inverseStatus(final int id) {
         if (repository.existsById(id)) {
-            repository.findById(id)
-                    .ifPresent(Order::inverseStatus);
+            Order toUpdate = repository.findById(id).get();
+            toUpdate.setStatus(!toUpdate.isStatus());
             return true;
         } else {
             return false;

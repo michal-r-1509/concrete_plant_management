@@ -1,4 +1,4 @@
-package com.concrete.concrete_plant_management.order;
+package com.concrete.concrete_plant_management;
 
 public enum ConcreteClass {
 

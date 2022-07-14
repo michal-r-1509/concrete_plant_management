@@ -1,11 +1,11 @@
 package com.concrete.concrete_plant_management.order;
 
+import com.concrete.concrete_plant_management.ConcreteClass;
+import com.concrete.concrete_plant_management.client.Client;
 import org.hibernate.annotations.GenericGenerator;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -18,14 +18,34 @@ public class Order {
     @GeneratedValue(generator = "inc")
     @GenericGenerator(name = "inc", strategy = "increment")
     private int id;
-    private boolean status;
     @NotNull(message = "date cannot be null")
     private LocalDate date;
     @NotNull(message = "time cannot be null")
     private LocalTime time;
+    @Min(1)
     private double amount;
+    private String concreteClass;
+    private String siteAddress;
+    private String description;
+    private boolean pump;
+    private boolean status;
+    @ManyToOne
+    @JoinColumn(name = "client_id", referencedColumnName = "id")
+    private Client client;
 
     public Order() {
+    }
+
+    public Order(final LocalDate date, final LocalTime time, final double amount, final String concreteClass,
+                 final String siteAddress, final String description, final boolean pump, final Client client) {
+        this.date = date;
+        this.time = time;
+        this.amount = amount;
+        this.concreteClass = concreteClass;
+        this.siteAddress = siteAddress;
+        this.description = description;
+        this.pump = pump;
+        this.client = client;
     }
 
     public int getId() {
@@ -68,16 +88,43 @@ public class Order {
         this.amount = amount;
     }
 
-    public void inverseStatus(){
-        this.setStatus(!isStatus());
+    public String getConcreteClass() {
+        return concreteClass;
+    }
+
+    public void setConcreteClass(final String concreteClass) {
+        this.concreteClass = concreteClass;
+    }
+
+    public String getSiteAddress() {
+        return siteAddress;
+    }
+
+    public void setSiteAddress(final String siteAddress) {
+        this.siteAddress = siteAddress;
+    }
+
+    public boolean isPump() {
+        return pump;
+    }
+
+    public void setPump(final boolean pump) {
+        this.pump = pump;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(final String description) {
+        this.description = description;
+    }
+
+    public Client getClient() {
+        return client;
+    }
+
+    public void setClient(final Client client) {
+        this.client = client;
     }
 }
-    /*@NotBlank(message = "company name cannot be empty")
-    private String company;
-    @NotBlank(message = "client name cannot be empty")
-    private String nameSurname;
-    @NotBlank(message = "client name cannot be empty")
-    private String siteAdress;
-    */
-//@NotNull(message = "concrete class cannot be null")
-//private boolean pump;

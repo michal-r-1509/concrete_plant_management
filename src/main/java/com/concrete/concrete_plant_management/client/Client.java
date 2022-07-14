@@ -25,7 +25,21 @@ public class Client {
 
     public Client() {
     }
+// konstruktor do usuniecia
+    public Client(final String name, final String streetAndNo, final String postCode,
+                  final String city, final long nip) {
+        this.name = name;
+        this.streetAndNo = streetAndNo;
+        this.postCode = postCode;
+        this.city = city;
+        this.nip = nip;
+    }
 
+    public Client(final int id) {
+        this.id = id;
+    }
+
+    //
     public int getId() {
         return id;
     }

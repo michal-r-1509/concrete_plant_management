@@ -26,4 +26,20 @@ public class ClientService {
     List<Client> getAllClients(){
         return repository.findAll();
     }
+
+    Client updateClient(final Client toUpdate) {
+        ClientSaveModel clientSaveModel = new ClientSaveModel();
+        Client result = clientSaveModel.clientModelValidating(toUpdate);
+        repository.findById(toUpdate.getId()).ifPresent(entity -> repository.save(result));
+        return result;
+    }
+
+    public boolean deleteClient(final int id) {
+        if (repository.existsById(id)){
+            repository.deleteById(id);
+            return true;
+        }else{
+            return false;
+        }
+    }
 }

@@ -35,61 +35,41 @@
             <div class="tables">
                 <table id="order_table">
                     <tr class="tr_header">
-                        <td>status</td>
-                        <td>id zamówienia</td>
-                        <td>data</td>
-                        <td>godzina</td>
-                        <td>ilość</td>
-                        <td colspan="3">Edycja</td>
+                        <th>status</th>
+                        <th>klient i adres budowy</th>
+                        <th>id zamówienia</th>
+                        <th>data</th>
+                        <th>godzina</th>
+                        <th>ilość</th>
+                        <th colspan="3">Edycja</th>
                     </tr>
                 </table>
                 <table id="order_management_table">
                     <tr class="tr_header">
-                        <td>A</td>
-                        <td>B</td>
-                        <td>C</td>
-                        <td colspan="2">Edycja</td>
+                        <th>A</th>
+                        <th>B</th>
+                        <th>C</th>
+                        <th colspan="2">Edycja</th>
                     </tr>
                 </table>
                 <table id="client_table">
                     <tr class="tr_header">
-                        <td>Nazwa</td>
-                        <td>Adres</td>
-                        <td>NIP</td>
-                        <td colspan="2">Edycja</td>
+                        <th>Nazwa</th>
+                        <th>Adres</th>
+                        <th>NIP</th>
+                        <th colspan="2">Edycja</th>
                     </tr>
-                    <tr>
-                        <td>${name}</td>
-                        <td>${streetAndNo}, ${postCode} ${city}</td>
-                        <td>${nip}</td>
-                        <td>
-                            <button class = "clientEditBtn">Edytuj</button>
-                        </td>
-                        <td>
-                            <button class = "clientDeleteBtn">Usuń</button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>${name}</td>
-                        <td>${streetAndNo}, ${postCode} ${city}</td>
-                        <td>${nip}</td>
-                        <td>
-                            <button class = "clientEditBtn">Edytuj</button>
-                        </td>
-                        <td>
-                            <button class = "clientDeleteBtn">Usuń</button>
-                        </td>
-                    </tr>
+
                 </table>
                 <table id="vehicle_table">
                     <tr class="tr_header">
-                        <td>Nazwa</td>
-                        <td>Typ</td>
-                        <td>Pojemność</td>
-                        <td>Długość pompy</td>
-                        <td>Nr rejestr.</td>
-                        <td>Opis</td>
-                        <td colspan="2">Edycja</td>
+                        <th>Nazwa</th>
+                        <th>Typ</th>
+                        <th>Pojemność</th>
+                        <th>Długość pompy</th>
+                        <th>Nr rejestr.</th>
+                        <th>Opis</th>
+                        <th colspan="2">Edycja</th>
                     </tr>
                 </table>
             </div>
@@ -101,12 +81,17 @@
 
 <div class="modal" id="order_modal">
     <div class="header">
-        <div class="title">Dodaj zamówienie</div>
+        <div id="order_modal_title" class="title">Dodaj zamówienie</div>
         <button class="close">&times;</button>
     </div>
     <div class="body">
         <form class="data_form">
             <div class="form_block">
+                <!--<label>Zamawiający
+                    <input type="text" id="client"/>
+                </label>-->
+                <label id="client_list">Zdefiniowani zamawiający
+                </label>
                 <label>Data
                     <input type="date" id="date" pattern="[0-9]{4}-[0-9]{2}-[0-9]{2}"/>
                 </label>
@@ -114,15 +99,15 @@
                     <input type="time" id="time" pattern="[0-9]{2}:[0-9]{2}"/>
                 </label>
                 <label>Adres
-                    <input type="text"/>
-                </label>
-                <label>Ilość
-                    <input type="number" id="amount"/>
+                    <input type="text" id="address"/>
                 </label>
             </div>
             <div>
+                <label>Ilość
+                    <input type="number" id="amount"/>
+                </label>
                 <label>Klasa betonu
-                    <select>
+                    <select id="conc_class">
                         <option>C8/10</option>
                         <option>C12/15</option>
                         <option>C16/20</option>
@@ -134,27 +119,27 @@
                         <option>C50/60</option>
                     </select>
                 </label>
-                <label>Klasa ekspozycji
-                    <input type="text"/>
-                </label>
                 <label>Pompa
-                    <input type="checkbox">
+                    <input type="checkbox" id="if_pump">
                 </label>
                 <label>Opis
-                    <input type="text"/>
+                    <input type="text" id="description"/>
                 </label>
             </div>
         </form>
     </div>
     <div class="footer">
-        <button class="button close">Anuluj</button>
-        <button class="button" id="addOrder">Zapisz</button>
+        <div></div>
+        <div>
+            <button class="button close">Anuluj</button>
+            <button class="button" id="addOrder">Zapisz</button>
+        </div>
     </div>
 </div>
 
 <div class="modal" id="client_modal">
     <div class="header">
-        <div id = "client_modal_title" class="title">Dodaj klienta</div>
+        <div id="client_modal_title" class="title">Dodaj klienta</div>
         <button class="close">&times;</button>
     </div>
 
@@ -182,14 +167,17 @@
         </form>
     </div>
     <div id="client_modal_footer" class="footer">
-        <button class="button close">Anuluj</button>
-        <button class="button" id="addClient">Zapisz</button>
+        <div></div>
+        <div>
+            <button class="button close">Anuluj</button>
+            <button class="button" id="addClient">Zapisz</button>
+        </div>
     </div>
 </div>
 
 <div class="modal" id="vehicle_modal">
     <div class="header">
-        <div class="title">Dodaj pojazd</div>
+        <div id="vehicle_modal_title" class="title">Dodaj pojazd</div>
         <button class="close">&times;</button>
     </div>
 
@@ -200,7 +188,7 @@
                     <input type="text" class="long_field" id="vehicle_name"/>
                 </label>
                 <label>Typ
-                    <select>
+                    <select id="vehicle_type">
                         <option selected>Gruszka</option>
                         <option>Pompo-gruszka</option>
                         <option>Pompa</option>
@@ -224,8 +212,63 @@
         </form>
     </div>
     <div class="footer">
-        <button class="button close">Anuluj</button>
-        <button class="button" id="addVehicle">Zapisz</button>
+        <div></div>
+        <div>
+            <button class="button close">Anuluj</button>
+            <button class="button" id="addVehicle">Zapisz</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="management_modal">
+    <div class="header">
+        <div class="title">Zaplanuj dostawę</div>
+        <button class="close">&times;</button>
+    </div>
+    <div class="body">
+        <div id="table_container" class="visible_tables">
+
+        </div>
+        <div class="management_form">
+        <form class=data_form>
+                <label id="vehicle_list">pojazd</label>
+                <label>ilość
+                    <input type="number" id="part_amount">
+                </label>
+                <label>Czas
+                    <input type="time" id="part_time" pattern="[0-9]{2}:[0-9]{2}"/>
+                </label>
+
+        </form>
+            <button id="part_add" class="small_buttons">+</button>
+        </div>
+
+    </div>
+    <div class="footer">
+        <div>
+            <label>Pozostało: <span id="amount_left"></span></label>
+            <label>Pompa: <span id="pump_nec"></span></label>
+            <label>Opis: <span id="ad_descr"></span></label>
+
+        </div>
+        <div>
+            <button class="button close">Anuluj</button>
+            <button class="button" id="addPlan">Zapisz</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="confirmation_modal">
+    <div class="header">
+        <div class="title">Potwierdź</div>
+        <button class="close">&times;</button>
+    </div>
+    <div class="body">
+        Czy na pewno usunąć?
+    </div>
+    <div class="footer">
+        <button class="button close">Nie</button>
+        <button class="button" id="confirm">Tak</button>
     </div>
 </div>
 
