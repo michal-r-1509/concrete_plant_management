@@ -13,7 +13,7 @@
         <a href="#order_table">
             <button id="orders_tab" type="button" class="tab_button">Zamówienia</button>
         </a>
-        <a href="#order_management_table">
+        <a href="#management_table">
             <button id="management_tab" type="button" class="tab_button">Wysyłka</button>
         </a>
         <a href="#client_table">
@@ -44,11 +44,15 @@
                         <th colspan="3">Edycja</th>
                     </tr>
                 </table>
-                <table id="order_management_table">
+                <table id="management_table">
                     <tr class="tr_header">
-                        <th>A</th>
-                        <th>B</th>
-                        <th>C</th>
+                        <th>status</th>
+                        <th>nr zamówienia</th>
+                        <th>typ i nazwa pojazdu</th>
+                        <th>zleceniodawca</th>
+                        <th>adres budowy</th>
+                        <th>ilość</th>
+                        <th>wyjazd</th>
                         <th colspan="2">Edycja</th>
                     </tr>
                 </table>
@@ -104,7 +108,7 @@
             </div>
             <div>
                 <label>Ilość
-                    <input type="number" id="amount"/>
+                    <input type="number" min="0" max="1000" step="0.5" placeholder="0.0-1000.0" id="amount"/>
                 </label>
                 <label>Klasa betonu
                     <select id="conc_class">
@@ -122,7 +126,7 @@
                 <label>Pompa
                     <input type="checkbox" id="if_pump">
                 </label>
-                <label>Opis
+                <label>Dodatkowe informacje
                     <input type="text" id="description"/>
                 </label>
             </div>
@@ -147,13 +151,14 @@
         <form class="data_form">
             <div class="form_block">
                 <label>Nazwa
-                    <input type="text" class="long_field" id="client_name"/>
+                    <input type="text" maxlength="50" class="long_field" id="client_name"/>
                 </label>
                 <label>Ulica i numer
-                    <input type="text" id="street"/>
+                    <input type="text" maxlength="50" id="street"/>
                 </label>
                 <label>Kod pocztowy
-                    <input type="text" id="post_code"/>
+                    <input type="text" maxlength="6" pattern="^\d{2}-\d{3}$"
+                           placeholder="00-000" id="post_code"/>
                 </label>
             </div>
             <div>
@@ -161,7 +166,8 @@
                     <input type="text" id="city"/>
                 </label>
                 <label>NIP
-                    <input type="number" id="nip"/>
+                    <input type="text" inputmode="numeric" minlength="10" maxlength="10"
+                           placeholder="tylko liczby" id="nip"/>
                 </label>
             </div>
         </form>
@@ -185,7 +191,7 @@
         <form class="data_form">
             <div class="form_block">
                 <label>Nazwa
-                    <input type="text" class="long_field" id="vehicle_name"/>
+                    <input type="text" maxlength="50" class="long_field" id="vehicle_name"/>
                 </label>
                 <label>Typ
                     <select id="vehicle_type">
@@ -195,18 +201,18 @@
                     </select>
                 </label>
                 <label>Pojemność
-                    <input type="number" id="capacity"/>
+                    <input type="number" min="0" max="30" step="0.5" placeholder="0.0-30.0" id="capacity"/>
                 </label>
             </div>
             <div>
                 <label>Długość pompy
-                    <input type="number" id="pump_length"/>
+                    <input type="number" min="0" max="100" step="0.5" placeholder="0.0-100.0" id="pump_length"/>
                 </label>
                 <label>Nr rejestracyjny
-                    <input type="text" id="reg_no"/>
+                    <input type="text" maxlength="10" id="reg_no"/>
                 </label>
-                <label>Opis
-                    <input type="text" id="vehicle_description"/>
+                <label>Dodatkowe informacje
+                    <input type="text" maxlength="100" id="vehicle_description"/>
                 </label>
             </div>
         </form>
@@ -227,16 +233,16 @@
     </div>
     <div class="body">
         <div id="table_container" class="visible_tables">
-
+<!--TODO tabela nie generuje scrolla             -->
         </div>
         <div class="management_form">
         <form class=data_form>
                 <label id="vehicle_list">pojazd</label>
                 <label>ilość
-                    <input type="number" id="part_amount">
+                    <input type="number" min="0" max="100" step="0.5" placeholder="0.0" id="part_amount" required>
                 </label>
                 <label>Czas
-                    <input type="time" id="part_time" pattern="[0-9]{2}:[0-9]{2}"/>
+                    <input type="time" id="part_time" pattern="[0-9]{2}:[0-9]{2}" required/>
                 </label>
 
         </form>

@@ -254,6 +254,11 @@ label{
     padding: 5px;
 }
 
+input:invalid {
+    border: 2px solid #de2828;
+    border-radius: 2px;
+}
+
 #overlay{
     position: fixed;
     transition: 200ms ease-in-out;

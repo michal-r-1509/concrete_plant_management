@@ -46,7 +46,7 @@ document.querySelector('section').addEventListener('click', ev => {
         orderManagementBtnHandler();
         let id = idPreparer(button.getAttribute('id'));
         createVehicleList();
-        managementWindowHandler(id);
+        managementWindowOpen(id);
     } else if (button.id.includes("or_edt")) {
         orderEditBtnHandler();
         editOrderForm(button.getAttribute('id'));
@@ -55,6 +55,14 @@ document.querySelector('section').addEventListener('click', ev => {
         let id = idPreparer(button.getAttribute('id'));
         deleteEntity(ordersUrl, id);
         tableRowDeleting('or_row_' + id);
+        closeButtonHandler();
+    }
+    else if (button.id.includes("mg_del")) {
+        // confirmationWindow();
+        let id = idPreparer(button.getAttribute('id'));
+        let orderId = parseInt(document.getElementById('mg__td_' + id).innerText)
+        deleteEntity(managementsUrl, id - (orderId * 10));
+        tableRowDeleting('mg_row_' + id);
         closeButtonHandler();
     }
 })
@@ -67,13 +75,23 @@ let ordersLoaded = false;
 let orderAddModalActive = false;
 
 // MANAGEMENT BUTTONS AND VARIABLES
-const managementsUrl = '/managements';
+const managementsUrl = '/order_batches';
 const managementModal = document.getElementById('management_modal');
 const management_button_tab = "management_tab";
 document.getElementById('part_add').addEventListener('click', addPartButtonHandler);
-document.getElementById('addPlan').addEventListener('click', () => alert("plan added"));
-let temporaryPartList = [];
+document.getElementById('addPlan').addEventListener('click', () => {
+    addingPlanHandler();
+});
+document.getElementById("table_container").addEventListener('click', ev => {
+    deletePartButtonHandler(ev.target);
+});
+let managementsLoaded = false;
+let managementAddModalActive = false;
+let temporaryBatchList = [];
 let partId = 0;
+let vehicleAmountSum = 0;
+let orderAmount = 0;
+let temporaryOrder = null;
 
 // CLIENT BUTTONS AND VARIABLES
 const clientsUrl = '/clients';
@@ -104,7 +122,7 @@ function tabTurningOn(buttonId) {
             break;
         }
         case "management_tab": {
-            managementLoading();
+            managementsLoading();
             break;
         }
         case "clients_tab": {
@@ -196,6 +214,7 @@ function orderEditBtnHandler() {
 function orderManagementBtnHandler() {
     managementModal.style.display = "block";
     overlay.classList.add('active');
+    managementAddModalActive = false;
 }
 
 function clientEditBtnHandler() {
@@ -213,7 +232,20 @@ function vehicleEditBtnHandler() {
 }
 
 function addPartButtonHandler() {
-    partAdding();
+    if (vehicleAmountSum <= orderAmount){
+        partFormReader();
+    }
+}
+
+function deletePartButtonHandler(button){
+    let intId = managementIdPreparer(button.id);
+    if (button.id.includes("pt_del_")) {
+        vehicleAmountSum -= parseFloat(temporaryBatchList[intId - 1].amount);
+        temporaryBatchList[intId - 1].amount = 0;
+        temporaryBatchList[intId - 1].vehicle = null;
+        footerDescriptionUpdate();
+        tableRowDeleting("pt_row_" + intId);
+    }
 }
 
 function confirmationWindow() {
@@ -237,11 +269,14 @@ async function closingModal() {
     orderModal.style.display = "none";
     clientModal.style.display = "none";
     vehicleModal.style.display = "none";
+    managementModal.style.display = "none";
+
     overlay.classList.remove('active');
 
     await resetForm();
 
     orderAddModalActive = false;
+    managementAddModalActive = false;
     clientAddModalActive = false;
     vehicleAddModalActive = false;
 }
@@ -262,12 +297,19 @@ function resetForm() {
         table.remove();
     }
     partId = 0;
-    temporaryPartList = [];
+    temporaryBatchList = [];
+    vehicleAmountSum = 0;
+    orderAmount = 0;
+    temporaryOrder = null;
 }
 
 function idPreparer(id) {
     actualId = parseInt(id.toString().substring(7));
     return actualId;
+}
+
+function managementIdPreparer(id) {
+    return parseInt(id.toString().substring(7));
 }
 
 function tableRowDeleting(id) {
@@ -388,40 +430,59 @@ function patchOrderRow(order) {
 
 // MANAGEMENTS
 
-async function managementLoading() {
+async function managementsLoading() {
+    if (managementsLoaded === false) {
+        managementsLoaded = true;
+        const response = await getEntityList(managementsUrl);
+        /*for (const resp of response) {
+            await createPlan(resp);
+        }*/
+        await createPlan(response);
+    }
     tabButtonDisabling(management_button_tab);
 }
 
-async function managementWindowHandler(id) {
-    let order = await getEntity(ordersUrl, id);
-    let amountLeft = await leftAmountCalc();
-    let entireAmount = parseFloat(order.amount);
-    await managementModalFill(order, entireAmount, amountLeft);
+async function managementWindowOpen(id) {
+    temporaryOrder = await getEntity(ordersUrl, id);
+    // TODO
+    //funkcja pobierająca z bazy OrderBatch zawierające id temporaryOrderu; posortowane po godzinie rosnąco
+
+    //
+    leftAmountCalc();
+    orderAmount = parseFloat(temporaryOrder.amount);
+    await managementFooterModalFill(temporaryOrder);
 }
 
-async function managementModalFill({amount, pump, description}, entireAmount, amountLeft) {
-    document.querySelector('#amount_left').innerHTML = (entireAmount - amountLeft).toString();
+async function managementFooterModalFill({pump, description}) {
+    document.querySelector('#amount_left').innerHTML = (orderAmount - vehicleAmountSum).toString();
     document.querySelector('#pump_nec').innerHTML = (pump === false ? "nie" : "tak");
     document.querySelector('#ad_descr').innerHTML = description;
 }
 
 function leftAmountCalc() {
     let amountsTable = document.getElementsByClassName('table_amounts');
-    let amount = 0;
     for (let i = 0; i < amountsTable.length; i++) {
-        amount += parseFloat(amountsTable[i].innerText);
+        vehicleAmountSum += parseFloat(amountsTable[i].innerText);
     }
-    return amount;
 }
 
-function partAdding() {
+async function partFormReader() {
     let vehicle = document.querySelector('#vehicle_selection');
     let amount = document.querySelector('#part_amount').value;
     let time = document.querySelector('#part_time').value;
 
-    addPartToTemporaryPartList(vehicle.value, amount, time);
-    createPart(vehicle.options[vehicle.selectedIndex].text, amount, time);
-    footerDescriptionUpdate(amount);
+    amount = parseFloat(amount);
+    amount = amount < 0 ? 0 : amount;
+    let vehicleEntity = await getEntity(vehiclesUrl, parseInt(vehicle.value));
+    amount = amount <= parseFloat(vehicleEntity.capacity) ? amount : parseFloat(vehicleEntity.capacity);
+
+    let vehicleTextValue = vehicle.options[vehicle.selectedIndex].text;
+    amount = (vehicleAmountSum + amount >= orderAmount) ? orderAmount - vehicleAmountSum : amount;
+    amount = vehicleTextValue.includes("Pompa") ? 0 : amount;
+
+    await addPartToTemporaryPartList(vehicleEntity.id, vehicleEntity.type, vehicleEntity.name, amount, time);
+    createPart(vehicleTextValue, amount, time);
+    footerDescriptionUpdate();
 }
 
 function createPart(vehicle, amount, time) {
@@ -429,6 +490,7 @@ function createPart(vehicle, amount, time) {
     let table = document.getElementById("part_table");
     const tableHeader = document.createElement('tr');
     const tableRow = document.createElement('tr');
+    tableRow.setAttribute('id', 'pt_row_' + partId);
     if (table === null) {
         table = document.createElement('table');
         table.setAttribute('id', "part_table");
@@ -442,17 +504,18 @@ function createPart(vehicle, amount, time) {
     table.appendChild(tableRow);
 }
 
-function addPartToTemporaryPartList(vehicle, amount, time){
-    partId = 0;
+function addPartToTemporaryPartList(vehicle, vehicleType, vehicleName, amount, time) {
+    vehicleAmountSum += amount;
     let part = {
         id: partId,
         vehicle: vehicle,
+        vehicleType: vehicleType,
+        vehicleName: vehicleName,
         amount: amount,
         time: time
     };
-    partId++;
-    temporaryPartList.push(part);
-    console.log("array: " + temporaryPartList.length);
+    partId += 1;
+    temporaryBatchList.push(part);
 }
 
 function tableHeaderRowCreating() {
@@ -465,14 +528,13 @@ function tableHeaderRowCreating() {
 function partTableRowCreating(vehicle, amount, time) {
     return `
                             <td>${vehicle}</td>
-                            <td class="table_amounts">${amount}</td>
+                            <td class="table_amounts">${amount === 0 ? "-" : amount}</td>
                             <td>${time}</td>
-                            <td><button >Usuń</button></td>`;
+                            <td><button id="pt_del_${partId}">Usuń</button></td>`;
 }
 
-function footerDescriptionUpdate(amount) {
-    let amountCounter = parseFloat(document.querySelector('#amount_left').innerHTML);
-    let left = amountCounter - amount;
+function footerDescriptionUpdate() {
+    let left = orderAmount - vehicleAmountSum;
     document.querySelector('#amount_left').innerHTML = left.toString();
 }
 
@@ -490,7 +552,53 @@ async function createVehicleList() {
     vehicleSelectedList.appendChild(selectTag);
 }
 
-// id="pt_del_${id}"
+function managementTableFormReader(){
+    let start = "[";
+    let end = "]"
+    let data = [];
+    for (const part of temporaryBatchList) {
+        if (part.vehicle != null){
+            data.push(JSON.stringify({
+                "amount": part.amount, "time": part.time + ':00.000',
+                "order": {"id": temporaryOrder.id, "date": temporaryOrder.date, "siteAddress": temporaryOrder.siteAddress},
+                "client": {"id": temporaryOrder.client.id, "name": temporaryOrder.client.name},
+                "vehicle": {"id": part.vehicle, "name": part.vehicleName, "type": part.vehicleType}
+            }));
+        }
+    }
+    return start + data + end;
+}
+
+async function addingPlanHandler(){
+    const data = managementTableFormReader();
+    const response = await postToServer(managementsUrl, data)
+    closingModal();
+    await createPlan(response);
+}
+
+function createPlan(planTable) {
+    const table = document.getElementById('management_table').getElementsByTagName('tbody')[0];
+    if (managementsLoaded === true) {
+        for (const row of Object.values(planTable)) {
+            const tableRow = document.createElement('tr');
+            tableRow.setAttribute('id', "mg_row_" + row.order.id + row.id)
+            tableRow.innerHTML = managementTableRowCreating(row);
+            table.appendChild(tableRow);
+        }
+    }
+}
+
+function managementTableRowCreating({id, amount, time, order, client, vehicle}) {
+    return `<td><input type="checkbox" ${status ? 'checked' : ''}/></td>
+                            <td id="mg__td_${order.id}${id}">${order.id}</td>
+                            <td>${vehicle.type} ${vehicle.name}</td>
+                            <td>${client.name}</td>
+                            <td>${order.siteAddress}</td>
+                            <td>${amount}</td>
+                            <td>${order.date}, ${time}</td>
+                            <td><button id="mg_del_${order.id}${id}">Usuń</button></td>
+                            <td><button id="mg_prt_${order.id}${id}">PRT</button></td>`;
+}
 
 // CLIENTS
 

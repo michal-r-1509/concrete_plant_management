@@ -2,6 +2,7 @@ package com.concrete.concrete_plant_management.order;
 
 import com.concrete.concrete_plant_management.client.Client;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -49,7 +50,7 @@ public class OrderController {
         System.out.println(toSave.getDate() + " " + toSave.getTime() + " " + toSave.getAmount());
         Order result = orderService.saveOrder(toSave);
         System.out.println(result.getId() + " " + result.isStatus());
-        return ResponseEntity.created(URI.create("/" + result.getId())).body(result);
+        return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }
 
     @GetMapping

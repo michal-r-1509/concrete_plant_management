@@ -1,5 +1,6 @@
 package com.concrete.concrete_plant_management.vehicle;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -40,7 +41,7 @@ public class VehicleController {
     @PostMapping
     ResponseEntity<Vehicle> saveVehicle(@RequestBody @Valid Vehicle toSave) {
         Vehicle result = vehicleService.saveVehicle(toSave);
-        return ResponseEntity.created(URI.create("/vehicles/" + result.getId())).body(result);
+        return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }
 
     @PutMapping("/{id}")

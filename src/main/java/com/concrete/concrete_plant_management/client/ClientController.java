@@ -1,5 +1,6 @@
 package com.concrete.concrete_plant_management.client;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -33,7 +34,7 @@ public class ClientController {
     @PostMapping
     ResponseEntity<Client> saveClient(@RequestBody @Valid Client toSave){
         Client result = clientService.saveClient(toSave);
-        return ResponseEntity.created(URI.create("/" + result.getId())).body(result);
+        return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }
 
     @GetMapping(value = "/{id}")
