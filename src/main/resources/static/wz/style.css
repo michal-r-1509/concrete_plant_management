@@ -1,0 +1,37 @@
+body {
+    width: 550px;
+    font-family: Calibri, serif;
+}
+
+main {
+    font-size: small;
+}
+
+h3 {
+    display: inline;
+    margin-bottom: 20px;
+    font-size: unset;
+}
+
+div {
+    margin-top: 10px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.inner_label {
+    height: 17px;
+    border-style: solid;
+    border-color: gray;
+    border-width: 1px;
+    background: lightgray;
+    margin-left: 20px;
+    min-width: 100px;
+}
+
+label {;
+    display: flex;
+    float: left;
+    width: max-content;
+}
+

@@ -4,13 +4,12 @@ public record NipParser(long data) {
 
     @Override
     public String toString() {
-        //TODO
         String nip = String.valueOf(data);
         if (nip.length() != 10){
             return "bad 'nip' format";
         }else {
-            return nip.substring(0,4) + "-" + nip.substring(4, 7)
-                    + "-" + nip.substring(7, 9) + "-" + nip.substring(9);
+            return nip.substring(0,3) + "-" + nip.substring(3, 6)
+                    + "-" + nip.substring(6, 8) + "-" + nip.substring(8);
         }
     }
 }

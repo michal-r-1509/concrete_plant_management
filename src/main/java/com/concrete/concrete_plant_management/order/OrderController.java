@@ -1,43 +1,41 @@
 package com.concrete.concrete_plant_management.order;
 
 import com.concrete.concrete_plant_management.client.Client;
-import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.net.URI;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 @RestController
 @RequestMapping("/orders")
-public class OrderController {
+class OrderController {
     private final OrderService orderService;
-    private final ApplicationEventPublisher eventPublisher;
 
-    public OrderController(final OrderService orderService,
-                           final ApplicationEventPublisher eventPublisher) {
+    public OrderController(final OrderService orderService) {
         this.orderService = orderService;
-        this.eventPublisher = eventPublisher;
 //
         List<Order> orderList = new ArrayList<>();
         orderList.add(new Order(LocalDate.of(2022,7,22),
                 LocalTime.of(10,30,0),
-                50, "C30/37", "długa 12", "teren grzaski", true,
+                50, "C30/37", "długa 12",
+                "teren grzaski", true, false,
                 new Client(3)));
         orderList.add(new Order(LocalDate.of(2022,8,1),
                 LocalTime.of(9,0,0),
-                13, "C16/20", "przy drodze nr 43, krzepice", "dodatkowe rynny", false,
+                13, "C16/20", "przy drodze nr 43, krzepice",
+                "dodatkowe rynny", false, true,
                 new Client(5)));
         orderList.add(new Order(LocalDate.of(2022,7,19),
                 LocalTime.of(10,0,0),
-                65, "C20/25", "obok tesco, czewa", "", false,
+                65, "C20/25", "obok tesco, czewa",
+                "", false, false,
                 new Client(1)));
         for (Order element : orderList) {
             orderService.saveOrder(element);
@@ -47,15 +45,36 @@ public class OrderController {
 
     @PostMapping
     ResponseEntity<Order> saveOrder(@RequestBody @Valid Order toSave){
-        System.out.println(toSave.getDate() + " " + toSave.getTime() + " " + toSave.getAmount());
         Order result = orderService.saveOrder(toSave);
-        System.out.println(result.getId() + " " + result.isStatus());
         return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }
 
-    @GetMapping
+    @PutMapping("/{id}")
+    ResponseEntity<Order> updateOrder(@PathVariable int id, @RequestBody @Valid Order toUpdate){
+        Order updated = orderService.updateOrder(id, toUpdate);
+        if (updated == null){
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok().body(updated);
+    }
+
+    @Transactional
+    @PatchMapping("/{id}")
+    public ResponseEntity<?> inverseStatus(@PathVariable int id){
+        if(!orderService.inverseStatus(id)){
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping(params = {"!sort"})
     ResponseEntity<List<Order>> readOrders(){
         return ResponseEntity.ok(orderService.getAllOrders());
+    }
+
+    @GetMapping
+    ResponseEntity<List<Order>> readOrders(Sort sort){
+        return ResponseEntity.ok(orderService.getAllOrders(sort));
     }
 
     @GetMapping("/{id}")
@@ -67,13 +86,10 @@ public class OrderController {
         return ResponseEntity.ok(order);
     }
 
-    @Transactional
-    @PatchMapping("/{id}")
-    public ResponseEntity<?> inverseStatus(@PathVariable int id){
-        if(!orderService.inverseStatus(id)){
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.noContent().build();
+    @GetMapping("/search")
+    ResponseEntity<List<Order>> readOrders(
+    @RequestParam(required = false, defaultValue = "false") boolean status, Sort sort){
+        return ResponseEntity.ok(orderService.getAllOrdersByState(status, sort));
     }
 
     @DeleteMapping("/{id}")

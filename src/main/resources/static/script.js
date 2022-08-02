@@ -23,56 +23,22 @@ document.querySelector('body').addEventListener('click', (ev => {
 let form = document.getElementsByClassName('data_form');
 
 document.querySelector('section').addEventListener('click', ev => {
-    let button = ev.target;
-    if (button.id.includes("cl_edt")) {
-        clientEditBtnHandler();
-        editClientForm(button.getAttribute('id'));
-    } else if (button.id.includes("cl_del")) {
-        // confirmationWindow();
-        let id = idPreparer(button.getAttribute('id'));
-        deleteEntity(clientsUrl, id);
-        tableRowDeleting('cl_row_' + id);
-        closeButtonHandler();
-    } else if (button.id.includes("vh_edt")) {
-        vehicleEditBtnHandler();
-        editVehicleForm(button.getAttribute('id'));
-    } else if (button.id.includes("vh_del")) {
-        // confirmationWindow();
-        let id = idPreparer(button.getAttribute('id'));
-        deleteEntity(vehiclesUrl, id);
-        tableRowDeleting('vh_row_' + id)
-        closeButtonHandler();
-    } else if (button.id.includes("or_mng")) {
-        orderManagementBtnHandler();
-        let id = idPreparer(button.getAttribute('id'));
-        createVehicleList();
-        managementWindowOpen(id);
-    } else if (button.id.includes("or_edt")) {
-        orderEditBtnHandler();
-        editOrderForm(button.getAttribute('id'));
-    } else if (button.id.includes("or_del")) {
-        // confirmationWindow();
-        let id = idPreparer(button.getAttribute('id'));
-        deleteEntity(ordersUrl, id);
-        tableRowDeleting('or_row_' + id);
-        closeButtonHandler();
-    }
-    else if (button.id.includes("mg_del")) {
-        // confirmationWindow();
-        let id = idPreparer(button.getAttribute('id'));
-        let orderId = parseInt(document.getElementById('mg__td_' + id).innerText)
-        deleteEntity(managementsUrl, id - (orderId * 10));
-        tableRowDeleting('mg_row_' + id);
-        closeButtonHandler();
-    }
+    tableButtonsHandler(ev.target);
 })
+
+const sortButton = document.getElementById('sort_confirm');
+sortButton.addEventListener('click', sortHandler);
+
+document.getElementById('display_form').addEventListener('change', ev => {
+    displayOrderRowsHandler(ev.target.id);
+});
 
 // ORDER BUTTONS AND VARIABLES
 const ordersUrl = '/orders';
 const orderModal = document.getElementById('order_modal');
 const orders_button_tab = "orders_tab";
-let ordersLoaded = false;
 let orderAddModalActive = false;
+const ordersTableName = "order_table";
 
 // MANAGEMENT BUTTONS AND VARIABLES
 const managementsUrl = '/order_batches';
@@ -83,10 +49,13 @@ document.getElementById('addPlan').addEventListener('click', () => {
     addingPlanHandler();
 });
 document.getElementById("table_container").addEventListener('click', ev => {
-    deletePartButtonHandler(ev.target);
+    if (ev.target.tagName.toUpperCase() === 'BUTTON') {
+        deletePartButtonHandler(ev.target);
+    }
 });
-let managementsLoaded = false;
 let managementAddModalActive = false;
+const managementsTableName = "management_table";
+const partTableName = "part_table";
 let temporaryBatchList = [];
 let partId = 0;
 let vehicleAmountSum = 0;
@@ -97,53 +66,126 @@ let temporaryOrder = null;
 const clientsUrl = '/clients';
 const clientModal = document.getElementById('client_modal');
 const clients_button_tab = "clients_tab";
-let clientsLoaded = false;
 let clientAddModalActive = false;
+const clientsTableName = "client_table";
 
 // VEHICLE BUTTONS AND VARIABLES
 const vehiclesUrl = '/vehicles';
 const vehicleModal = document.getElementById('vehicle_modal');
 const vehicles_button_tab = "vehicles_tab";
-let vehiclesLoaded = false;
+const vehiclesTableName = "vehicle_table";
 let vehicleAddModalActive = false;
 
 // OTHER BUTTON AND VARIABLES
-const confirmationModal = document.getElementById('confirmation_modal');
+const informationModal = document.getElementById('information_modal');
 const overlay = document.getElementById('overlay');
 const button_tab_list = [orders_button_tab, management_button_tab, clients_button_tab, vehicles_button_tab];
 let actualId = 0;
+const tableContainer = document.getElementById('tables_main_container');
+const sortContainer = "sort_container"
+const footerSortOptionsContainer = document.getElementById(sortContainer);
+const footerDisplayOptionsContainer = document.getElementById('display_container');
+let displayState = "";
+let displayStateUrl = "";
 
 // BUTTONS HANDLERS
 
-function tabTurningOn(buttonId) {
+async function tabTurningOn(buttonId) {
     switch (buttonId) {
         case "orders_tab": {
-            ordersLoading();
+            await tableRemoving();
+            await tableCreating(ordersTableName);
+            await sortOptionsRemoving();
+            await sortOptionsCreating(ordersTableName);
+            displayOptionsHandler(true);
+            await ordersLoading(ordersUrl);
             break;
         }
         case "management_tab": {
-            managementsLoading();
+            await tableRemoving();
+            await tableCreating(managementsTableName);
+            await sortOptionsRemoving();
+            await sortOptionsCreating(managementsTableName);
+            displayOptionsHandler(false);
+            await managementsLoading(managementsUrl);
             break;
         }
         case "clients_tab": {
-            clientsLoading();
+            await tableRemoving();
+            await tableCreating(clientsTableName);
+            await sortOptionsRemoving();
+            await sortOptionsCreating(clientsTableName);
+            displayOptionsHandler(false);
+            await clientsLoading(clientsUrl);
             break;
         }
         case "vehicles_tab": {
-            vehiclesLoading();
+            await tableRemoving();
+            await tableCreating(vehiclesTableName);
+            await sortOptionsRemoving();
+            await sortOptionsCreating(vehiclesTableName);
+            displayOptionsHandler(false);
+            await vehiclesLoading(vehiclesUrl);
             break;
         }
     }
 }
 
-function modalTurningOn(modalId) {
+async function tableButtonsHandler(element) {
+    if (element.id.includes("or_mng")) {
+        orderManagementBtnHandler();
+        let id = idPreparer(element.getAttribute('id'));
+        await createVehicleList();
+        await managementWindowOpen(id);
+    } else if (element.id.includes("or_edt")) {
+        await orderEditBtnHandler();
+        await editOrderForm(element.getAttribute('id'));
+    } else if (element.id.includes("or_del")) {
+        let id = idPreparer(element.getAttribute('id'));
+        await deleteEntity(ordersUrl, id);
+        tableRowDeleting('or_row_' + id);
+    } else if (element.id.includes("mg_del")) {
+        let id = idPreparer(element.getAttribute('id'));
+        await deleteEntity(managementsUrl, id);
+        tableRowDeleting('mg_row_' + id);
+    }else if (element.id.includes("mg_prt")) {
+        let id = idPreparer(element.getAttribute('id'));
+        await printHandler(id);
+    } else if (element.id.includes("cl_edt")) {
+        clientEditBtnHandler();
+        await editClientForm(element.getAttribute('id'));
+    } else if (element.id.includes("cl_del")) {
+        let id = idPreparer(element.getAttribute('id'));
+        let status = await deleteEntity(clientsUrl, id);
+        if (status) {
+            tableRowDeleting('cl_row_' + id);
+        }else {
+            informationWindow();
+        }
+    } else if (element.id.includes("vh_edt")) {
+        vehicleEditBtnHandler();
+        await editVehicleForm(element.getAttribute('id'));
+    } else if (element.id.includes("vh_del")) {
+        let id = idPreparer(element.getAttribute('id'));
+        let status = await deleteEntity(vehiclesUrl, id);
+        if (status) {
+            tableRowDeleting('vh_row_' + id);
+        } else {
+            informationWindow();
+        }
+    }else if (element.id.includes("sts")){
+        await statusCheckboxHandler(element);
+    }
+}
+
+async function modalTurningOn(modalId) {
     switch (modalId) {
         case "order_button": {
             orderModal.style.display = "block";
             overlay.classList.add('active');
             document.getElementById('order_modal_title').innerHTML = "Dodaj zamówienie";
             orderAddModalActive = true;
-            createClientList();
+            await createClientList();
             break;
         }
         case "client_button": {
@@ -168,7 +210,7 @@ async function closeButtonHandler() {
     clientModal.style.display = "none";
     vehicleModal.style.display = "none";
     managementModal.style.display = "none";
-    confirmationModal.style.display = "none";
+    informationModal.style.display = "none";
     overlay.classList.remove('active');
     await resetForm();
 }
@@ -180,7 +222,6 @@ async function saveButtonHandler(saveButtonId) {
                 await saveOrder();
             } else {
                 await patchOrder(actualId);
-                alert("function nie dziala jeszcze");
             }
             break;
         }
@@ -194,20 +235,20 @@ async function saveButtonHandler(saveButtonId) {
         }
         case "addVehicle": {
             if (vehicleAddModalActive === true) {
-                saveVehicle();
+                await saveVehicle();
             } else {
-                patchVehicle(actualId);
+                await patchVehicle(actualId);
             }
             break;
         }
     }
 }
 
-function orderEditBtnHandler() {
+async function orderEditBtnHandler() {
     orderModal.style.display = "block";
     overlay.classList.add('active');
     orderAddModalActive = false;
-    createClientList();
+    await createClientList();
     document.getElementById('order_modal_title').innerHTML = "Edytuj zamówienie";
 }
 
@@ -231,25 +272,30 @@ function vehicleEditBtnHandler() {
     document.getElementById('vehicle_modal_title').innerHTML = "Edytuj pojazd";
 }
 
-function addPartButtonHandler() {
-    if (vehicleAmountSum <= orderAmount){
-        partFormReader();
+async function addPartButtonHandler() {
+    if (vehicleAmountSum <= orderAmount) {
+        await partFormReader();
     }
 }
 
-function deletePartButtonHandler(button){
-    let intId = managementIdPreparer(button.id);
-    if (button.id.includes("pt_del_")) {
-        vehicleAmountSum -= parseFloat(temporaryBatchList[intId - 1].amount);
-        temporaryBatchList[intId - 1].amount = 0;
-        temporaryBatchList[intId - 1].vehicle = null;
-        footerDescriptionUpdate();
-        tableRowDeleting("pt_row_" + intId);
+async function deletePartButtonHandler(button) {
+    let rowId = idPreparer(button.id);
+    temporaryBatchList[rowId - 1].amount = 0;
+    temporaryBatchList[rowId - 1].toDelete = true;
+    button.parentElement.parentElement.remove();
+    orderBatchAmountSum();
+    footerDescriptionUpdate();
+}
+
+function orderBatchAmountSum() {
+    vehicleAmountSum = 0.0;
+    for (let i = 0; i < temporaryBatchList.length - 1; i++) {
+        vehicleAmountSum += temporaryBatchList[i].amount;
     }
 }
 
-function confirmationWindow() {
-    confirmationModal.style.display = "block";
+function informationWindow() {
+    informationModal.style.display = "block";
     overlay.classList.add('active');
 }
 
@@ -260,6 +306,59 @@ function tabButtonDisabling(buttonId) {
         if (buttonId !== button_tab_list[i]) {
             document.getElementById(button_tab_list[i]).disabled = '';
         }
+    }
+}
+
+async function sortHandler() {
+    let sortOption = footerSortOptionsContainer.firstElementChild;
+    let tableName = sortOption.id.substring(5);
+    await tableRemoving();
+    await tableCreating(tableName);
+    switch (tableName) {
+        case ordersTableName: {
+            await ordersLoading(ordersUrl + displayStateUrl + "?sort=" + sortOption.value + displayState);
+            break;
+        }
+        case managementsTableName: {
+            await managementsLoading(managementsUrl + "?sort=" + sortOption.value);
+            break;
+        }
+        case clientsTableName: {
+            await clientsLoading(clientsUrl + "?sort=" + sortOption.value);
+            break;
+        }
+        case vehiclesTableName: {
+            await vehiclesLoading(vehiclesUrl + "?sort=" + sortOption.value);
+            break;
+        }
+    }
+}
+
+async function statusCheckboxHandler(checkbox) {
+    let rowId = (checkbox.parentElement.parentElement).id;
+    let id = idPreparer(checkbox.getAttribute('id'));
+    let status = checkbox.checked;
+    if (checkbox.id.includes("or_sts")) {
+        editButtonsDisplay(rowId, status);
+        await orderStatusHandler(id);
+    } else if (checkbox.id.includes("pt_sts")) {
+        editButtonsDisplay(rowId, status);
+        await orderBatchStatusHandler(id);
+    }
+}
+
+function editButtonsDisplay(rowId, status){
+    let buttons = document.getElementById(rowId).getElementsByTagName('button');
+    for (let i = 0; i < buttons.length; i++) {
+        buttons[i].disabled = status;
+    }
+}
+
+function displayOptionsHandler(bool){
+    if (bool) {
+        footerDisplayOptionsContainer.style.display = "block";
+    }else {
+        footerDisplayOptionsContainer.style.display = "none";
     }
 }
 
@@ -292,7 +391,7 @@ function resetForm() {
             element.remove();
         }
     }
-    let table = document.getElementById('part_table');
+    let table = document.getElementById(partTableName);
     if (table !== null) {
         table.remove();
     }
@@ -308,18 +407,41 @@ function idPreparer(id) {
     return actualId;
 }
 
-function managementIdPreparer(id) {
-    return parseInt(id.toString().substring(7));
-}
-
 function tableRowDeleting(id) {
     document.getElementById(id).remove();
 }
 
+function tableRemoving() {
+    let newTable = tableContainer.firstElementChild;
+    if (newTable !== null) {
+        newTable.remove();
+    }
+}
+
+function displayOrderRowsHandler(id){
+    if (id.includes("display_done")){
+        displayState = "&status=true";
+        displayStateUrl = "/search"
+    }else if (id.includes("display_undone")){
+        displayState = "&status=false";
+        displayStateUrl = "/search"
+    }else{
+        displayState = "";
+        displayStateUrl = "";
+    }
+}
+
 // ORDERS
 
+async function ordersLoading(url) {
+    const response = await getEntityList(url);
+    for (const resp of response) {
+        createOrder(resp);
+    }
+    tabButtonDisabling(orders_button_tab);
+}
+
 function orderFormReader() {
-    // let client = document.querySelector('#client');
     let definedClient = document.querySelector('#client_selection')
     let date = document.querySelector('#date');
     let time = document.querySelector('#time');
@@ -331,14 +453,14 @@ function orderFormReader() {
 
     if (orderAddModalActive === true) {
         return JSON.stringify({
-            "date": date.value, "time": time.value + ':00.000',
+            "date": date.value, "time": time.value,
             "concreteClass": concreteClass.value, "siteAddress": address.value, "pump": pump.checked,
             "description": description.value, "amount": amount.value,
             "client": {"id": definedClient.value, "name": definedClient.options[definedClient.selectedIndex].text}
         });
     } else {
         return JSON.stringify({
-            "id": actualId, "date": date.value, "time": time.value + ':00.000',
+            "id": actualId, "date": date.value, "time": time.value,
             "concreteClass": concreteClass.value, "siteAddress": address.value, "pump": pump.checked,
             "description": description.value, "amount": amount.value,
             "client": {"id": definedClient.value, "name": definedClient.options[definedClient.selectedIndex].text}
@@ -348,31 +470,35 @@ function orderFormReader() {
 
 async function saveOrder() {
     const data = orderFormReader();
-    const response = await postToServer(ordersUrl, data)
-    closingModal();
-    createOrder(response);
-}
-
-function createOrder(order) {
-    const table = document.getElementById('order_table').getElementsByTagName('tbody')[0];
-    const tableRow = document.createElement('tr');
-    tableRow.setAttribute('id', "or_row_" + order.id)
-    if (ordersLoaded === true) {
-        tableRow.innerHTML = orderTableRowCreating(order);
-        table.appendChild(tableRow);
+    const response = await postToServer(ordersUrl, data);
+    if (response !== null) {
+        await closingModal();
+        createOrder(response);
     }
 }
 
-function orderTableRowCreating({id, date, time, amount, concreteClass, siteAddress, pump, status, client}) {
-    return `<td><input type="checkbox" ${status ? 'checked' : ''}/></td>
+async function orderStatusHandler(id) {
+    await patchServerEntity(ordersUrl, id);
+}
+
+function createOrder(order) {
+    const table = document.getElementById(ordersTableName);
+    const tableRow = document.createElement('tr');
+    tableRow.setAttribute('id', "or_row_" + order.id)
+    tableRow.innerHTML = orderTableRowCreating(order);
+    table.appendChild(tableRow);
+}
+
+function orderTableRowCreating({id, date, time, amount, siteAddress, status, client}) {
+    return `<td><input id="or_sts_${id}" type="checkbox" ${status ? 'checked' : ''}/></td>
                             <td>${client.name}, ${siteAddress}</td>
                             <td>${id}</td>
                             <td>${date}</td>
-                            <td>${time}</td>
+                            <td>${time.toString().substring(0, 5)}</td>
                             <td>${amount}</td>
-                            <td><button id="or_mng_${id}">Zaplanuj</button></td>
-                            <td><button id="or_edt_${id}">Edytuj</button></td>
-                            <td><button id="or_del_${id}">Usuń</button></td>`;
+                            <td><button id="or_mng_${id}" ${status ? 'disabled' : ''}>Zaplanuj</button></td>
+                            <td><button id="or_edt_${id}" ${status ? 'disabled' : ''}>Edytuj</button></td>
+                            <td><button id="or_del_${id}" ${status ? 'disabled' : ''}>Usuń</button></td>`;
 }
 
 async function editOrderForm(id) {
@@ -380,7 +506,7 @@ async function editOrderForm(id) {
     await orderModalFill(data);
 }
 
-async function orderModalFill({id, date, time, amount, concreteClass, siteAddress, pump, description, status, client}) {
+async function orderModalFill({date, time, amount, concreteClass, siteAddress, pump, description, client}) {
     document.querySelector('#client_selection').value = client.id;
     document.querySelector('#date').value = date;
     document.querySelector('#time').value = time;
@@ -389,17 +515,6 @@ async function orderModalFill({id, date, time, amount, concreteClass, siteAddres
     document.querySelector('#conc_class').value = concreteClass;
     document.querySelector('#if_pump').checked = pump;
     document.querySelector('#description').value = description;
-}
-
-async function ordersLoading() {
-    if (ordersLoaded === false) {
-        ordersLoaded = true;
-        const response = await getEntityList(ordersUrl);
-        for (const resp of response) {
-            createOrder(resp);
-        }
-    }
-    tabButtonDisabling(orders_button_tab);
 }
 
 async function createClientList() {
@@ -418,39 +533,50 @@ async function createClientList() {
 
 async function patchOrder(id) {
     const data = orderFormReader();
-    const response = await patchServerEntity(ordersUrl, id, data);
-    closingModal();
-    patchOrderRow(response);
+    const response = await updateServerEntity(ordersUrl, id, data);
+    if (response !== null) {
+        await closingModal();
+        patchOrderRow(response);
+    }
 }
 
 function patchOrderRow(order) {
     let tableRow = document.getElementById('or_row_' + order.id);
-    tableRow.innerHTML = clientTableRowCreating(order);
+    tableRow.innerHTML = orderTableRowCreating(order);
 }
 
 // MANAGEMENTS
 
-async function managementsLoading() {
-    if (managementsLoaded === false) {
-        managementsLoaded = true;
-        const response = await getEntityList(managementsUrl);
-        /*for (const resp of response) {
-            await createPlan(resp);
-        }*/
-        await createPlan(response);
-    }
+async function managementsLoading(url) {
+    const response = await getEntityList(url);
+    await createPlan(response);
     tabButtonDisabling(management_button_tab);
 }
 
 async function managementWindowOpen(id) {
     temporaryOrder = await getEntity(ordersUrl, id);
-    // TODO
-    //funkcja pobierająca z bazy OrderBatch zawierające id temporaryOrderu; posortowane po godzinie rosnąco
-
-    //
+    document.querySelector('#part_time').value = temporaryOrder.time.toString().substring(0,5);
+    await orderBatchLoading(id);
     leftAmountCalc();
     orderAmount = parseFloat(temporaryOrder.amount);
     await managementFooterModalFill(temporaryOrder);
+}
+
+async function orderBatchLoading(id) {
+    let response = await getEntityList(managementsUrl + "/search/" + id);
+    if (response !== null) {
+        partId = 0;
+        for (const resp of Object.values(response)) {
+            addPartToTemporaryBatchList(resp.id, resp.vehicle.id, resp.vehicle.type, resp.vehicle.regNo,
+                resp.vehicle.name, resp.amount, resp.time, false);
+            let vehicleTypeAndName = resp.vehicle.type + " " + resp.vehicle.regNo + " " + resp.vehicle.name;
+            await createPart(vehicleTypeAndName, resp.amount, resp.time);
+        }
+    }
+}
+
+async function orderBatchStatusHandler(id) {
+    await patchServerEntity(managementsUrl, id);
 }
 
 async function managementFooterModalFill({pump, description}) {
@@ -460,9 +586,9 @@ async function managementFooterModalFill({pump, description}) {
 }
 
 function leftAmountCalc() {
-    let amountsTable = document.getElementsByClassName('table_amounts');
-    for (let i = 0; i < amountsTable.length; i++) {
-        vehicleAmountSum += parseFloat(amountsTable[i].innerText);
+    vehicleAmountSum = 0;
+    for (let i = 0; i < temporaryBatchList.length; i++) {
+        vehicleAmountSum += parseFloat(temporaryBatchList[i].amount);
     }
 }
 
@@ -470,6 +596,7 @@ async function partFormReader() {
     let vehicle = document.querySelector('#vehicle_selection');
     let amount = document.querySelector('#part_amount').value;
     let time = document.querySelector('#part_time').value;
+
 
     amount = parseFloat(amount);
     amount = amount < 0 ? 0 : amount;
@@ -480,56 +607,59 @@ async function partFormReader() {
     amount = (vehicleAmountSum + amount >= orderAmount) ? orderAmount - vehicleAmountSum : amount;
     amount = vehicleTextValue.includes("Pompa") ? 0 : amount;
 
-    await addPartToTemporaryPartList(vehicleEntity.id, vehicleEntity.type, vehicleEntity.name, amount, time);
+    await addPartToTemporaryBatchList(0, vehicleEntity.id, vehicleEntity.type, vehicleEntity.regNo,
+        vehicleEntity.name, amount, time, false);
     createPart(vehicleTextValue, amount, time);
     footerDescriptionUpdate();
 }
 
-function createPart(vehicle, amount, time) {
+function createPart(vehicleTypeAndName, amount, time) {
     const table_container = document.getElementById('table_container');
-    let table = document.getElementById("part_table");
+    let table = document.getElementById(partTableName);
     const tableHeader = document.createElement('tr');
     const tableRow = document.createElement('tr');
     tableRow.setAttribute('id', 'pt_row_' + partId);
     if (table === null) {
         table = document.createElement('table');
-        table.setAttribute('id', "part_table");
+        table.setAttribute('id', partTableName);
         table.setAttribute('class', 'part_table');
-        tableHeader.innerHTML = tableHeaderRowCreating();
+        tableHeader.innerHTML = partTableHeaderRowCreating();
         tableHeader.setAttribute('class', 'tr_header');
         table.appendChild(tableHeader);
         table_container.appendChild(table);
     }
-    tableRow.innerHTML = partTableRowCreating(vehicle, amount, time);
+    tableRow.innerHTML = partTableRowCreating(vehicleTypeAndName, amount, time);
     table.appendChild(tableRow);
 }
 
-function addPartToTemporaryPartList(vehicle, vehicleType, vehicleName, amount, time) {
+function addPartToTemporaryBatchList(orderBatchId, vehicleId, vehType, vehRegNo, vehName, amount, time, toDelete) {
     vehicleAmountSum += amount;
     let part = {
-        id: partId,
-        vehicle: vehicle,
-        vehicleType: vehicleType,
-        vehicleName: vehicleName,
+        orderBatchId: orderBatchId,
+        vehicleId: vehicleId,
+        vehicleType: vehType,
+        vehicleRegNo: vehRegNo,
+        vehicleName: vehName,
         amount: amount,
-        time: time
+        time: time,
+        toDelete: toDelete
     };
     partId += 1;
     temporaryBatchList.push(part);
 }
 
-function tableHeaderRowCreating() {
+function partTableHeaderRowCreating() {
     return `        <th>pojazd</th>
                     <th>ilość</th>
                     <th>godz. załadunku</th>
                     <th>edycja</th>`
 }
 
-function partTableRowCreating(vehicle, amount, time) {
+function partTableRowCreating(vehicleData, amount, time) {
     return `
-                            <td>${vehicle}</td>
+                            <td>${vehicleData}</td>
                             <td class="table_amounts">${amount === 0 ? "-" : amount}</td>
-                            <td>${time}</td>
+                            <td>${time.toString().substring(0, 5)}</td>
                             <td><button id="pt_del_${partId}">Usuń</button></td>`;
 }
 
@@ -546,61 +676,73 @@ async function createVehicleList() {
     for (const vehicle of vehicleList) {
         let listElement = document.createElement("option");
         listElement.value = vehicle.id;
-        listElement.text = vehicle.type + " " + vehicle.name;
+        listElement.text = vehicle.type + ", " + vehicle.regNo + ", " + vehicle.name;
         selectTag.appendChild(listElement);
     }
     vehicleSelectedList.appendChild(selectTag);
 }
 
-function managementTableFormReader(){
+function managementTableFormReader() {
     let start = "[";
     let end = "]"
     let data = [];
     for (const part of temporaryBatchList) {
-        if (part.vehicle != null){
-            data.push(JSON.stringify({
-                "amount": part.amount, "time": part.time + ':00.000',
-                "order": {"id": temporaryOrder.id, "date": temporaryOrder.date, "siteAddress": temporaryOrder.siteAddress},
-                "client": {"id": temporaryOrder.client.id, "name": temporaryOrder.client.name},
-                "vehicle": {"id": part.vehicle, "name": part.vehicleName, "type": part.vehicleType}
-            }));
-        }
+        data.push(JSON.stringify({
+            "batchId": part.orderBatchId, "amount": part.amount, "time": part.time, "toDelete": part.toDelete,
+            "order": {"id": temporaryOrder.id},
+            "vehicle": {"id": part.vehicleId}
+        }));
     }
     return start + data + end;
 }
 
-async function addingPlanHandler(){
+async function addingPlanHandler() {
     const data = managementTableFormReader();
-    const response = await postToServer(managementsUrl, data)
-    closingModal();
-    await createPlan(response);
+    if (data !== "[]") {
+        await postToServer(managementsUrl, data)
+    }
+    await closingModal();
 }
 
-function createPlan(planTable) {
-    const table = document.getElementById('management_table').getElementsByTagName('tbody')[0];
-    if (managementsLoaded === true) {
-        for (const row of Object.values(planTable)) {
-            const tableRow = document.createElement('tr');
-            tableRow.setAttribute('id', "mg_row_" + row.order.id + row.id)
-            tableRow.innerHTML = managementTableRowCreating(row);
-            table.appendChild(tableRow);
-        }
+async function createPlan(planTable) {
+    const table = document.getElementById(managementsTableName);
+    if (table === null) {
+        await tableCreating(managementsTableName);
+    }
+    for (const row of Object.values(planTable)) {
+        const tableRow = document.createElement('tr');
+        tableRow.setAttribute('id', "mg_row_" + row.id)
+        tableRow.innerHTML = await managementTableRowCreating(row);
+        table.appendChild(tableRow);
     }
 }
 
-function managementTableRowCreating({id, amount, time, order, client, vehicle}) {
-    return `<td><input type="checkbox" ${status ? 'checked' : ''}/></td>
-                            <td id="mg__td_${order.id}${id}">${order.id}</td>
-                            <td>${vehicle.type} ${vehicle.name}</td>
-                            <td>${client.name}</td>
+async function managementTableRowCreating({id, amount, time, status, order, vehicle}) {
+    return `<td><input id="pt_sts_${id}" type="checkbox" ${status ? 'checked' : ''}/></td>
+                            <td id="mg__td_${id}">${order.id}</td>
+                            <td>${vehicle.type}, ${vehicle.regNo}, ${vehicle.name}</td>
+                            <td>${order.client.name}</td>
                             <td>${order.siteAddress}</td>
                             <td>${amount}</td>
-                            <td>${order.date}, ${time}</td>
-                            <td><button id="mg_del_${order.id}${id}">Usuń</button></td>
-                            <td><button id="mg_prt_${order.id}${id}">PRT</button></td>`;
+                            <td>${order.date}, ${time.toString().substring(0, 5)}</td>
+                            <td><button id="mg_del_${id}" ${status ? 'disabled' : ''}>Usuń</button></td>
+                            <td><button id="mg_prt_${id}" ${status ? 'disabled' : ''}>WZ</button></td>`;
+}
+
+async function printHandler(id){
+    let response = await getEntity(managementsUrl, id);
+    await print(response);
 }
 
 // CLIENTS
+
+async function clientsLoading(url) {
+    const response = await getEntityList(url);
+    for (const resp of response) {
+        createClient(resp);
+    }
+    tabButtonDisabling(clients_button_tab);
+}
 
 function clientFormReader() {
     let client_name = document.querySelector("#client_name");
@@ -626,7 +768,7 @@ async function editClientForm(id) {
     await clientModalFill(data);
 }
 
-function clientModalFill({id, name, streetAndNo, postCode, city, nip}) {
+function clientModalFill({name, streetAndNo, postCode, city, nip}) {
     document.querySelector("#client_name").value = name;
     document.querySelector('#street').value = streetAndNo;
     document.querySelector("#post_code").value = postCode;
@@ -637,25 +779,27 @@ function clientModalFill({id, name, streetAndNo, postCode, city, nip}) {
 async function saveClient() {
     const data = clientFormReader();
     const response = await postToServer(clientsUrl, data)
-    closingModal();
-    createClient(response);
+    if (response !== null) {
+        await closingModal();
+        createClient(response);
+    }
 }
 
 async function patchClient(id) {
     const data = clientFormReader();
-    const response = await patchServerEntity(clientsUrl, id, data);
-    closingModal();
-    patchClientRow(response);
+    const response = await updateServerEntity(clientsUrl, id, data);
+    if (response !== null) {
+        await closingModal();
+        patchClientRow(response);
+    }
 }
 
 function createClient(client) {
-    const table = document.getElementById('client_table').getElementsByTagName('tbody')[0];
+    const table = document.getElementById(clientsTableName);
     const tableRow = document.createElement('tr');
     tableRow.setAttribute('id', "cl_row_" + client.id)
-    if (clientsLoaded === true) {
-        tableRow.innerHTML = clientTableRowCreating(client);
-        table.appendChild(tableRow);
-    }
+    tableRow.innerHTML = clientTableRowCreating(client);
+    table.appendChild(tableRow);
 }
 
 function patchClientRow(client) {
@@ -667,23 +811,24 @@ function clientTableRowCreating({id, name, streetAndNo, postCode, city, nip}) {
     return `
                             <td>${name}</td>
                             <td>${streetAndNo}, ${postCode} ${city}</td>
-                            <td>${nip}</td>
+                            <td>${nip.toString()
+        .substring(0, 3)}-${nip.toString()
+        .substring(3, 6)}-${nip.toString()
+        .substring(6, 8)}-${nip.toString()
+        .substring(8)}</td>
                             <td><button id="cl_edt_${id}">Edytuj</button></td>
                             <td><button id="cl_del_${id}">Usuń</button></td>`;
 }
 
-async function clientsLoading() {
-    if (clientsLoaded === false) {
-        clientsLoaded = true;
-        const response = await getEntityList(clientsUrl);
-        for (const resp of response) {
-            createClient(resp);
-        }
-    }
-    tabButtonDisabling(clients_button_tab);
-}
-
 // VEHICLES
+
+async function vehiclesLoading(url) {
+    const response = await getEntityList(url);
+    for (const resp of response) {
+        createVehicle(resp);
+    }
+    tabButtonDisabling(vehicles_button_tab);
+}
 
 function vehicleFormReader() {
     let vehicle_name = document.querySelector("#vehicle_name");
@@ -698,7 +843,7 @@ function vehicleFormReader() {
 
     if (vehicleAddModalActive === true) {
         return JSON.stringify({
-            "name": vehicle_name.value, "type": vehicle_type.value,
+            "id": "", "name": vehicle_name.value, "type": vehicle_type.value,
             "capacity": capacity_v, "pumpLength": pump_length_v, "regNo": reg_no.value,
             "description": description.value
         });
@@ -716,7 +861,7 @@ async function editVehicleForm(id) {
     await vehicleModalFill(data);
 }
 
-function vehicleModalFill({id, name, type, capacity, pumpLength, regNo, description}) {
+function vehicleModalFill({name, type, capacity, pumpLength, regNo, description}) {
     document.querySelector("#vehicle_name").value = name;
     document.querySelector('#vehicle_type').value = type;
     document.querySelector("#capacity").value = capacity;
@@ -727,26 +872,28 @@ function vehicleModalFill({id, name, type, capacity, pumpLength, regNo, descript
 
 async function saveVehicle() {
     const data = vehicleFormReader();
-    const response = await postToServer(vehiclesUrl, data)
-    closingModal();
-    createVehicle(response);
+    const response = await postToServer(vehiclesUrl, data);
+    if (response !== null){
+        await closingModal();
+        createVehicle(response);
+    }
 }
 
 async function patchVehicle(id) {
     const data = vehicleFormReader();
-    const response = await patchServerEntity(vehiclesUrl, id, data);
-    closingModal();
-    patchVehicleRow(response);
+    const response = await updateServerEntity(vehiclesUrl, id, data);
+    if (response !== null) {
+        await closingModal();
+        patchVehicleRow(response);
+    }
 }
 
 function createVehicle(vehicle) {
-    const table = document.getElementById('vehicle_table').getElementsByTagName('tbody')[0];
+    const table = document.getElementById(vehiclesTableName);
     const tableRow = document.createElement('tr');
     tableRow.setAttribute('id', "vh_row_" + vehicle.id)
-    if (vehiclesLoaded === true) {
-        tableRow.innerHTML = vehicleTableRowCreating(vehicle);
-        table.appendChild(tableRow);
-    }
+    tableRow.innerHTML = vehicleTableRowCreating(vehicle);
+    table.appendChild(tableRow);
 }
 
 function patchVehicleRow(vehicle) {
@@ -766,17 +913,6 @@ function vehicleTableRowCreating({id, name, type, capacity, pumpLength, regNo, d
                             <td><button id="vh_del_${id}">Usuń</button></td>`;
 }
 
-async function vehiclesLoading() {
-    if (vehiclesLoaded === false) {
-        vehiclesLoaded = true;
-        const response = await getEntityList(vehiclesUrl);
-        for (const resp of response) {
-            createVehicle(resp);
-        }
-    }
-    tabButtonDisabling(vehicles_button_tab);
-}
-
 // SERVER OPERATIONS
 
 async function postToServer(url, data) {
@@ -786,19 +922,33 @@ async function postToServer(url, data) {
         headers: {'Content-Type': 'application/json'}
     })
         .then(resp => {
-            return resp.json()
+            if (resp.status < 200 && resp.status > 299) {
+                return null;
+            }
+            return resp.json();
         });
 }
 
-async function patchServerEntity(url, id, data) {
+async function updateServerEntity(url, id, data) {
     return await fetch(url + '/' + id, {
         method: 'PUT',
         body: data,
         headers: {'Content-Type': 'application/json'}
     })
         .then(resp => {
-            return resp.json()
+            if (resp.status < 200 && resp.status > 299) {
+                return null;
+            }
+            return resp.json();
         });
+}
+
+async function patchServerEntity(url, id) {
+    let response = await fetch(url + '/' + id, {
+        method: 'PATCH',
+        headers: {'Content-Type': 'application/json'}
+    });
+    return response.status < 200 && response.status > 299;
 }
 
 async function getEntityList(url) {
@@ -816,17 +966,128 @@ async function getEntity(url, id) {
 }
 
 async function deleteEntity(url, id) {
-    await fetch(url + '/' + id, {method: 'DELETE'});
+    let response = await fetch(url + '/' + id, {method: 'DELETE'});
+    return response.status >= 200 && response.status < 299;
 }
 
-/*function loadScript(url) {
-    const head = document.getElementsByTagName('head')[0];
-    const script = document.createElement('script');
-    script.type = 'text/javascript';
-    script.src = url;
-    head.appendChild(script);
+// GENERAL HTML ELEMENTS
+
+async function tableCreating(tableName) {
+    const table = document.createElement('table');
+    table.setAttribute('id', tableName);
+    tableContainer.appendChild(table);
+    let headerRow = document.createElement('tr');
+    headerRow.setAttribute('class', 'tr_header');
+    headerRow.innerHTML = tableHeaderRowCreating(tableName);
+    table.appendChild(headerRow);
 }
 
-loadScript("connection_script.js");*/
+function tableHeaderRowCreating(tableName) {
+    switch (tableName) {
+        case ordersTableName: {
+            return `<th>status</th>
+            <th>klient i adres budowy</th>
+            <th>id zamówienia</th>
+            <th>data</th>
+            <th>godzina</th>
+            <th>ilość</th>
+            <th colSpan="3">Edycja</th>`
+        }
+        case managementsTableName: {
+            return `<th>status</th>
+            <th>nr zamówienia</th>
+            <th>typ i nazwa pojazdu</th>
+            <th>zleceniodawca</th>
+            <th>adres budowy</th>
+            <th>ilość</th>
+            <th>wyjazd</th>
+            <th colSpan="2">Edycja</th>`
+        }
+        case clientsTableName: {
+            return `<th>Nazwa</th>
+            <th>Adres</th>
+            <th>NIP</th>
+            <th colSpan="2">Edycja</th>`
+        }
+        case vehiclesTableName: {
+            return `<th>nazwa</th>
+            <th>typ</th>
+            <th>pojemność</th>
+            <th>długość pompy</th>
+            <th>nr rejestr.</th>
+            <th>opis</th>
+            <th colspan="2">Edycja</th>`
+        }
+    }
+}
 
+function sortOptionsCreating(tableName) {
+    sortButton.style.display = "block";
+    const selectList = document.createElement('select');
+    selectList.setAttribute('id', "sort_" + tableName);
+    footerSortOptionsContainer.appendChild(selectList);
+    selectList.innerHTML = createSortOptionsList(tableName);
+}
 
+function createSortOptionsList(tableName) {
+    switch (tableName) {
+        case ordersTableName: {
+            return `<option value="date,asc">data rosnąco</option>
+                        <option value="date,desc">data malejąco</option>
+                        <option value="client.name,asc">klient rosnąco</option>
+                        <option value="client.name,desc">klient malejąco</option>
+                        <option value="id,asc">nr zam. rosnąco</option>
+                        <option value="id,desc">nr zam. malejąco</option>
+                        <option value="amount,asc">ilość rosnąco</option>
+                        <option value="amount,desc">ilość malejąco</option>`
+        }
+        case managementsTableName: {
+            return `<option value="order.date,asc&time,asc">czas rosnąco</option>
+                        <option value="order.date,desc&time,desc">czas malejąco</option>`
+        }
+        case clientsTableName: {
+            return `<option value="name,asc">nazwa rosnąco</option>
+                        <option value="name,desc">nazwa malejąco</option>
+                        <option value="nip,asc">NIP rosnąco</option>
+                        <option value="nip,desc">NIP malejąco</option>`
+        }
+        case vehiclesTableName: {
+            return `<option value="name,asc">nazwa rosnąco</option>
+                        <option value="name,desc">nazwa malejąco</option>
+                        <option value="regNo,asc">nr rej. rosnąco</option>
+                        <option value="regNo,desc">nr rej. malejąco</option>
+                        <option value="type,asc">typ rosnąco</option>
+                        <option value="type,desc">typ malejąco</option>`
+        }
+    }
+}
+
+function sortOptionsRemoving() {
+    let sortList = document.getElementById(sortContainer);
+    let firstElementChild = sortList.firstElementChild;
+    if (firstElementChild !== null) {
+        firstElementChild.remove();
+    }
+}
+
+// PRINTING
+
+function print({wz_no, date, time, site_address, client_and_address, vehicle_name, vehicle_reg, amount, c_class}) {
+    const wzTemplate = document.getElementById("wz_print");
+    const iframeWindow = wzTemplate.contentWindow;
+    const iframeDocument = wzTemplate.contentDocument;
+
+    iframeDocument.getElementById("wz_title").textContent = wz_no;
+    iframeDocument.getElementById("wz_no").textContent = wz_no;
+    iframeDocument.getElementById("wz_date").textContent = date;
+    iframeDocument.getElementById("wz_address").textContent = site_address;
+    iframeDocument.getElementById("wz_client").textContent = client_and_address;
+    iframeDocument.getElementById("wz_veh_name").textContent = vehicle_name;
+    iframeDocument.getElementById("wz_veh_reg").textContent = vehicle_reg;
+    iframeDocument.getElementById("wz_amount").textContent = amount;
+    iframeDocument.getElementById("wz_class").textContent = c_class;
+    iframeDocument.getElementById("wz_time").textContent = time;
+
+    iframeWindow.focus();
+    iframeWindow.print();
+}

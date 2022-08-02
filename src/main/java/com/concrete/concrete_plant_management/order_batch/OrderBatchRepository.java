@@ -1,9 +1,13 @@
 package com.concrete.concrete_plant_management.order_batch;
 
-import com.concrete.concrete_plant_management.order_batch.OrderBatch;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
-public interface OrderBatchRepository extends JpaRepository<OrderBatch, Integer> {
+interface OrderBatchRepository extends JpaRepository<OrderBatch, Integer> {
+
+    boolean existsOrderBatchByVehicle_Id(int id);
+    List<OrderBatch> findAllOrderBatchesByOrder_Id(int id);
 }

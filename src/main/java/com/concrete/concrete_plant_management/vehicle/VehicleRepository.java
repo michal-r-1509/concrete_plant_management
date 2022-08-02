@@ -4,5 +4,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface VehicleRepository extends JpaRepository<Vehicle, Integer> {
+interface VehicleRepository extends JpaRepository<Vehicle, Integer> {
+
+    boolean existsByRegNo(String regNo);
+
 }

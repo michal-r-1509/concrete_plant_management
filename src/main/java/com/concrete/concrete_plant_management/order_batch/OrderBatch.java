@@ -24,19 +24,23 @@ public class OrderBatch {
     @GeneratedValue(generator = "inc")
     @GenericGenerator(name = "inc", strategy = "increment")
     private int id;
-    @Min(1L)
+    @Min(0L)
     private float amount;
     @NotNull(message = "time cannot be null")
     private LocalTime time;
+    private boolean status;
     @ManyToOne
     @JoinColumn(name = "order_id", referencedColumnName = "id")
     private Order order;
-    @ManyToOne
-    @JoinColumn(name = "client_id", referencedColumnName = "id")
-    private Client client;
     @OneToOne
     @JoinColumn(name = "vehicle_id", referencedColumnName = "id")
     private Vehicle vehicle;
 
-
+    public OrderBatch(final float amount, final LocalTime time, final boolean status, final Order order, final Vehicle vehicle) {
+        this.amount = amount;
+        this.time = time;
+        this.status = status;
+        this.order = order;
+        this.vehicle = vehicle;
+    }
 }

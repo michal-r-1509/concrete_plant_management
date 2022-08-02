@@ -1,6 +1,5 @@
 package com.concrete.concrete_plant_management.vehicle;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -31,6 +30,7 @@ public class Vehicle {
     private float capacity;
     private float pumpLength;
 
+//    do usuniecia
     public Vehicle(final String name, final String type, final String regNo, final String description,
                    final float capacity, final float pumpLength) {
         this.name = name;
@@ -40,4 +40,5 @@ public class Vehicle {
         this.capacity = capacity;
         this.pumpLength = pumpLength;
     }
+//
 }

@@ -1,16 +1,18 @@
-html{
+html {
     font-family: 'Montserrat', sans-serif;
 }
-body{
-    background: rgb(33,33,56);
-    background: linear-gradient(90deg, rgba(33,33,56,1) 0%, rgba(49,77,115,1) 47%, rgba(7,34,164,1) 100%);
+
+body {
+    background: rgb(33, 33, 56);
+    background: linear-gradient(90deg, rgba(33, 33, 56, 1) 0%, rgba(49, 77, 115, 1) 47%, rgba(7, 34, 164, 1) 100%);
     color: lightgray;
-    margin:0;
+    margin: 0;
     font-size: 10px;
     font-variant-caps: all-petite-caps;
     justify-content: center;
 }
-button{
+
+button {
     font-family: 'Montserrat', sans-serif;
     position: relative;
     width: 120px;
@@ -24,15 +26,19 @@ button{
     font-variant-caps: all-petite-caps;
     box-sizing: border-box;
     transition: all .1s ease-in-out;
+    cursor: pointer;
 }
-button:hover{
-    background-color: rgba(49,77,115,1);
+
+button:hover {
+    background-color: rgba(49, 77, 115, 1);
 }
-.tab_button:disabled{
+
+.tab_button:disabled {
     color: lightgray;
     font-weight: bold;
-    background-color: rgba(7,34,164,0.8);
+    background-color: rgba(7, 34, 164, 0.8);
 }
+
 td button {
     width: 60px;
     padding: 2px;
@@ -42,36 +48,44 @@ td button {
     border-radius: 8px;
 }
 
-.small_buttons{
+td button:disabled {
+    color: darkgray;
+    font-weight: bold;
+}
+
+.small_buttons {
     width: 40px;
     height: 30px;
     padding: 2px;
     margin: 3px;
     font-size: 18px;
-    /*border: lightgray solid 1px;*/
     border-radius: 8px;
     float: left;
 }
 
-a{
+a {
     text-decoration: none;
     cursor: default;
 }
-nav{
+
+nav {
     display: flex;
     justify-content: center;
     padding: 10px;
 }
-main{
+
+main {
     display: flex;
     align-items: stretch;
     padding: 10px;
 }
-aside{
+
+aside {
     float: left;
     padding: 10px;
     width: min-content;
 }
+
 section {
     float: left;
     align-items: stretch;
@@ -80,23 +94,48 @@ section {
     width: 80%;
 }
 
-article{
+article {
     padding: 10px;
     height: 400px;
     border: 2px solid lightgray;
     border-radius: 15px;
     background-color: rgba(131, 137, 150, 0.5);
 }
-/*footer{
-    height: 100px;
+
+footer {
+    height: 50px;
     left: 50%;
     right: 50%;
     display: flex;
+    align-items: center;
     justify-content: center;
     padding: 10px;
-    flex-direction: column;
-}*/
-table{
+}
+
+footer button {
+    display: none;
+    width: 60px;
+    height: 40px;
+    padding: 5px;
+    margin-left: 20px;
+    align-content: center;
+}
+
+#display_container {
+    display: none;
+}
+
+footer label {
+    display: flex;
+    width: auto;
+    justify-content: left;
+    align-content: center;
+    font-size: 12px;
+    padding: 2px;
+}
+
+table {
+    display: block;
     margin-left: auto;
     margin-right: auto;
     width: auto;
@@ -104,34 +143,32 @@ table{
     overflow-y: auto;
     max-height: 400px;
 }
-.tables{
+
+.tables {
     display: flex;
     align-items: center;
-}
-.tables table{
-    display: none;
+    width: 100%;
 }
 
-.tables table:target{
-    display: block;
-}
-
-.visible_tables{
+.smaller_tables {
+    display: grid;
     padding: 10px;
     height: 150px;
     max-height: 150px;
     border: 2px solid lightgray;
     border-radius: 15px;
     background-color: rgba(131, 137, 150, 0.5);
+    overflow-y: auto;
+    justify-content: center;
 }
 
-.part_table{
-    overflow-y: auto;
+.part_table {
     max-height: 140px;
     inline-size: -moz-available;
+    width: 100%;
 }
 
-th{
+th {
     border: 1px solid lightgray;
     padding: 4px;
     min-width: 40px;
@@ -139,34 +176,39 @@ th{
     font-size: 12px;
 }
 
-.tr_header{
-    background: linear-gradient(90deg, rgb(43, 60, 93) 0%, rgba(49,77,115,1) 47%, rgb(18, 58, 133) 100%);
+.tr_header {
+    background: linear-gradient(90deg, rgb(43, 60, 93) 0%, rgba(49, 77, 115, 1) 47%, rgb(18, 58, 133) 100%);
 }
 
-.tr_header:hover{
+.tr_header:hover {
     background-color: unset;
 }
-tr{
+
+tr {
     vertical-align: middle;
     transition: all .1s ease-in-out;
 }
-tr:hover{
-    background-color: rgba(49,77,115,1);
+
+tr:hover {
+    background-color: rgba(49, 77, 115, 1);
 }
 
-td{
+td {
     text-align: center;
+    padding-left: 3px;
+    padding-right: 3px;
     border: 1px solid lightgray;
     border-collapse: collapse;
     min-width: 40px;
 }
-.modal{
+
+.modal {
     font-size: 12px;
     display: none;
     position: fixed;
     z-index: 1;
     margin: auto;
-    background-color: rgba(49,77,115,1);
+    background-color: rgba(49, 77, 115, 1);
     padding: 10px;
     top: 40%;
     left: 50%;
@@ -180,29 +222,39 @@ td{
     animation-fill-mode: forwards;
 }
 
-.management_form{
+.management_form {
     display: flex;
     align-items: end;
     justify-content: space-evenly;
 }
 
-.modal--close{
+.modal--close {
     animation-name: modal---close;
 }
 
-.header{
+.modal.info {
+    width: 300px;
+}
+
+.body.info {
+    margin-left: 10px;
+}
+
+.header {
     justify-content: space-between;
     display: flex;
     height: fit-content;
     align-items: center;
     padding-bottom: 5px;
 }
-.header .title{
+
+.header .title {
     font-size: 30px;
     font-weight: bold;
     padding-left: 20px;
 }
-.header .close{
+
+.header .close {
     cursor: pointer;
     border: none;
     outline: none;
@@ -213,7 +265,8 @@ td{
     width: auto;
     padding-top: 0;
 }
-.footer{
+
+.footer {
     display: flex;
     justify-content: space-between;
     vertical-align: bottom;
@@ -221,34 +274,41 @@ td{
     padding-top: 15px;
     width: auto;
 }
-.footer label{
+
+.footer.info {
+    justify-content: end;
+}
+
+.footer label {
     padding: 1px;
 }
 
-.footer input{
+.footer input {
     max-width: 150px;
 }
 
-.footer span{
+.footer span {
     display: contents;
 }
 
-.modal .data_form{
+.modal .data_form {
     align-items: center;
     justify-content: space-between;
     display: flex;
 }
-.form_block{
+
+.form_block {
     float: left;
     padding-right: 50px;
 }
-label{
+
+label {
     display: grid;
     width: 250px;
     padding: 5px;
 }
 
-.management_form label{
+.management_form label {
     display: block;
     width: auto;
     padding: 5px;
@@ -259,7 +319,12 @@ input:invalid {
     border-radius: 2px;
 }
 
-#overlay{
+iframe {
+    visibility: hidden;
+    position: fixed;
+}
+
+#overlay {
     position: fixed;
     transition: 200ms ease-in-out;
     opacity: 0;
@@ -267,20 +332,29 @@ input:invalid {
     bottom: 0;
     left: 0;
     right: 0;
-    background-color: rgba(0,0,0,0.5);
+    background-color: rgba(0, 0, 0, 0.5);
     pointer-events: none;
 }
-#overlay.active{
+
+#overlay.active {
     opacity: 1;
     pointer-events: all;
 }
 
 @keyframes modal---open {
-    from{transform: translate(-50%, -50%) scale(0.5)}
-    to{transform: translate(-50%, -50%) scale(1)}
+    from {
+        transform: translate(-50%, -50%) scale(0.5)
+    }
+    to {
+        transform: translate(-50%, -50%) scale(1)
+    }
 }
 
 @keyframes modal---close {
-    from{transform: translate(-50%, -50%) scale(1)}
-    to{transform: translate(-50%, -50%) scale(0.5)}
+    from {
+        transform: translate(-50%, -50%) scale(1)
+    }
+    to {
+        transform: translate(-50%, -50%) scale(0.5)
+    }
 }

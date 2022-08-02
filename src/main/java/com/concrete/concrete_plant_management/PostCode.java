@@ -4,7 +4,6 @@ public record PostCode(String postCode) {
 
     @Override
     public String toString() {
-        //TODO
         if (postCode.length() < 5 || postCode.length() > 6){
             return "bad post code format";
         }

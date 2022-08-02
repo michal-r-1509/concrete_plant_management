@@ -1,13 +1,21 @@
 package com.concrete.concrete_plant_management.client;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 
+@Getter
+@Setter
+@NoArgsConstructor
 @Entity
 @Table(name = "clients")
 public class Client {
@@ -21,11 +29,11 @@ public class Client {
     private String streetAndNo;
     private String postCode;
     private String city;
+    @Min(1000000000L)
+    @Max(9999999999L)
     private long nip;
 
-    public Client() {
-    }
-// konstruktor do usuniecia
+// to delete
     public Client(final String name, final String streetAndNo, final String postCode,
                   final String city, final long nip) {
         this.name = name;
@@ -38,53 +46,5 @@ public class Client {
     public Client(final int id) {
         this.id = id;
     }
-
     //
-    public int getId() {
-        return id;
-    }
-
-    public void setId(final int id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(final String name) {
-        this.name = name;
-    }
-
-    public String getStreetAndNo() {
-        return streetAndNo;
-    }
-
-    public void setStreetAndNo(final String streetAndNo) {
-        this.streetAndNo = streetAndNo;
-    }
-
-    public String getCity() {
-        return city;
-    }
-
-    public void setCity(final String city) {
-        this.city = city;
-    }
-
-    public String getPostCode() {
-        return postCode;
-    }
-
-    public void setPostCode(final String postCode) {
-        this.postCode = postCode;
-    }
-
-    public long getNip() {
-        return nip;
-    }
-
-    public void setNip(final long nip) {
-        this.nip = nip;
-    }
 }

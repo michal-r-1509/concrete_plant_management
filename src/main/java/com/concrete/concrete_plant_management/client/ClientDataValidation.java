@@ -2,7 +2,7 @@ package com.concrete.concrete_plant_management.client;
 
 import com.concrete.concrete_plant_management.PostCode;
 
-public class ClientSaveModel {
+class ClientDataValidation {
 
     public Client clientModelValidating(final Client toSave) {
         PostCode postCode = new PostCode(toSave.getPostCode());
