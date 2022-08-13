@@ -76,10 +76,16 @@ const vehicles_button_tab = "vehicles_tab";
 const vehiclesTableName = "vehicle_table";
 let vehicleAddModalActive = false;
 
+// ARCHIVE BUTTONS AND VARIABLES
+const archivesUrl = '/archives';
+const archive_button_tab = "archive_tab";
+const archiveTableName = "archive_table";
+
 // OTHER BUTTON AND VARIABLES
 const informationModal = document.getElementById('information_modal');
 const overlay = document.getElementById('overlay');
-const button_tab_list = [orders_button_tab, management_button_tab, clients_button_tab, vehicles_button_tab];
+const button_tab_list = [orders_button_tab, management_button_tab, clients_button_tab,
+    vehicles_button_tab, archive_button_tab];
 let actualId = 0;
 const tableContainer = document.getElementById('tables_main_container');
 const sortContainer = "sort_container"
@@ -91,71 +97,69 @@ let displayStateUrl = "";
 // BUTTONS HANDLERS
 
 async function tabTurningOn(buttonId) {
+    displayOptionsHandler(false);
     switch (buttonId) {
         case "orders_tab": {
-            await tableRemoving();
             await tableCreating(ordersTableName);
-            await sortOptionsRemoving();
             await sortOptionsCreating(ordersTableName);
             displayOptionsHandler(true);
             await ordersLoading(ordersUrl);
             break;
         }
         case "management_tab": {
-            await tableRemoving();
             await tableCreating(managementsTableName);
-            await sortOptionsRemoving();
             await sortOptionsCreating(managementsTableName);
-            displayOptionsHandler(false);
             await managementsLoading(managementsUrl);
             break;
         }
         case "clients_tab": {
-            await tableRemoving();
             await tableCreating(clientsTableName);
-            await sortOptionsRemoving();
             await sortOptionsCreating(clientsTableName);
-            displayOptionsHandler(false);
             await clientsLoading(clientsUrl);
             break;
         }
         case "vehicles_tab": {
-            await tableRemoving();
             await tableCreating(vehiclesTableName);
-            await sortOptionsRemoving();
             await sortOptionsCreating(vehiclesTableName);
-            displayOptionsHandler(false);
             await vehiclesLoading(vehiclesUrl);
+            break;
+        }
+        case "archive_tab":{
+            await tableCreating(archiveTableName);
+            await sortOptionsCreating(archiveTableName);
+            await archiveLoading(archivesUrl);
             break;
         }
     }
 }
 
 async function tableButtonsHandler(element) {
+    let id;
+    if (element.id.includes("_")){
+        id = idPreparer(element.getAttribute('id'));
+    }
     if (element.id.includes("or_mng")) {
         orderManagementBtnHandler();
-        let id = idPreparer(element.getAttribute('id'));
-        await createVehicleList();
         await managementWindowOpen(id);
     } else if (element.id.includes("or_edt")) {
         await orderEditBtnHandler();
         await editOrderForm(element.getAttribute('id'));
     } else if (element.id.includes("or_del")) {
-        let id = idPreparer(element.getAttribute('id'));
+        await deleteEntity(ordersUrl, id);
+        tableRowDeleting('or_row_' + id);
+    } else if (element.id.includes("or_arc")) {
+        await archiveOrder(archivesUrl, id);
         await deleteEntity(ordersUrl, id);
         tableRowDeleting('or_row_' + id);
     } else if (element.id.includes("mg_del")) {
-        let id = idPreparer(element.getAttribute('id'));
         await deleteEntity(managementsUrl, id);
         tableRowDeleting('mg_row_' + id);
     }else if (element.id.includes("mg_prt")) {
-        let id = idPreparer(element.getAttribute('id'));
         await printHandler(id);
     } else if (element.id.includes("cl_edt")) {
         clientEditBtnHandler();
         await editClientForm(element.getAttribute('id'));
     } else if (element.id.includes("cl_del")) {
-        let id = idPreparer(element.getAttribute('id'));
         let status = await deleteEntity(clientsUrl, id);
         if (status) {
             tableRowDeleting('cl_row_' + id);
@@ -166,7 +170,6 @@ async function tableButtonsHandler(element) {
         vehicleEditBtnHandler();
         await editVehicleForm(element.getAttribute('id'));
     } else if (element.id.includes("vh_del")) {
-        let id = idPreparer(element.getAttribute('id'));
         let status = await deleteEntity(vehiclesUrl, id);
         if (status) {
             tableRowDeleting('vh_row_' + id);
@@ -331,6 +334,10 @@ async function sortHandler() {
             await vehiclesLoading(vehiclesUrl + "?sort=" + sortOption.value);
             break;
         }
+        case archiveTableName: {
+            await archiveLoading(archivesUrl + "?sort=" + sortOption.value);
+            break;
+        }
     }
 }
 
@@ -339,27 +346,37 @@ async function statusCheckboxHandler(checkbox) {
     let id = idPreparer(checkbox.getAttribute('id'));
     let status = checkbox.checked;
     if (checkbox.id.includes("or_sts")) {
-        editButtonsDisplay(rowId, status);
-        await orderStatusHandler(id);
+        let response = await orderStatusHandler(id);
+        if (response){
+            editButtonsDisplay(rowId, status);
+        }
     } else if (checkbox.id.includes("pt_sts")) {
-        editButtonsDisplay(rowId, status);
-        await orderBatchStatusHandler(id);
+        let response = await orderBatchStatusHandler(id);
+        if (response){
+            editButtonsDisplay(rowId, status);
+        }
     }
 }
 
 function editButtonsDisplay(rowId, status){
     let buttons = document.getElementById(rowId).getElementsByTagName('button');
     for (let i = 0; i < buttons.length; i++) {
+        if (buttons[i].id.includes("or_del")){
+            buttons[i].textContent = status ? "archiwizuj" : "usuń";
+            buttons[i].id = buttons[i].id.replace("del", "arc");
+            continue;
+        }
+        if (buttons[i].id.includes("or_arc")){
+            buttons[i].textContent = status ? "archiwizuj" : "usuń";
+            buttons[i].id = buttons[i].id.replace("arc", "del");
+            continue;
+        }
         buttons[i].disabled = status;
     }
 }
 
 function displayOptionsHandler(bool){
-    if (bool) {
-        footerDisplayOptionsContainer.style.display = "block";
-    }else {
-        footerDisplayOptionsContainer.style.display = "none";
-    }
+    footerDisplayOptionsContainer.style.display = bool ? "block" : "none";
 }
 
 // GENERAL
@@ -369,7 +386,6 @@ async function closingModal() {
     clientModal.style.display = "none";
     vehicleModal.style.display = "none";
     managementModal.style.display = "none";
-
     overlay.classList.remove('active');
 
     await resetForm();
@@ -451,21 +467,12 @@ function orderFormReader() {
     let pump = document.querySelector('#if_pump');
     let description = document.querySelector('#description');
 
-    if (orderAddModalActive === true) {
-        return JSON.stringify({
-            "date": date.value, "time": time.value,
-            "concreteClass": concreteClass.value, "siteAddress": address.value, "pump": pump.checked,
-            "description": description.value, "amount": amount.value,
-            "client": {"id": definedClient.value, "name": definedClient.options[definedClient.selectedIndex].text}
-        });
-    } else {
-        return JSON.stringify({
-            "id": actualId, "date": date.value, "time": time.value,
-            "concreteClass": concreteClass.value, "siteAddress": address.value, "pump": pump.checked,
-            "description": description.value, "amount": amount.value,
-            "client": {"id": definedClient.value, "name": definedClient.options[definedClient.selectedIndex].text}
-        });
-    }
+    return JSON.stringify({
+        "id": orderAddModalActive ? "" : actualId, "date": date.value, "time": time.value,
+        "concreteClass": concreteClass.value, "siteAddress": address.value, "pump": pump.checked,
+        "description": description.value, "amount": amount.value,
+        "client": {"id": definedClient.value, "name": definedClient.options[definedClient.selectedIndex].text}
+    });
 }
 
 async function saveOrder() {
@@ -483,22 +490,27 @@ async function orderStatusHandler(id) {
 
 function createOrder(order) {
     const table = document.getElementById(ordersTableName);
+    if (table === null){
+        return;
+    }
     const tableRow = document.createElement('tr');
-    tableRow.setAttribute('id', "or_row_" + order.id)
+    tableRow.setAttribute('id', "or_row_" + order.id);
     tableRow.innerHTML = orderTableRowCreating(order);
     table.appendChild(tableRow);
 }
 
-function orderTableRowCreating({id, date, time, amount, siteAddress, status, client}) {
-    return `<td><input id="or_sts_${id}" type="checkbox" ${status ? 'checked' : ''}/></td>
-                            <td>${client.name}, ${siteAddress}</td>
+function orderTableRowCreating({id, date, time, amount, siteAddress, status, pump, client}) {
+    let buttonText = status ? "archiwizuj" : "usuń";
+    let buttonId = status ? "arc" : "del";
+    return `<td><input id="or_sts_${id}" type="checkbox" disabled ${status ? 'checked' : ''}/></td>
+                            <td>${client.name}${siteAddress === "" ? "" : ", " + siteAddress}</td>
                             <td>${id}</td>
                             <td>${date}</td>
                             <td>${time.toString().substring(0, 5)}</td>
-                            <td>${amount}</td>
+                            <td>${amount}${pump ? " + P" : ""}</td>
                             <td><button id="or_mng_${id}" ${status ? 'disabled' : ''}>Zaplanuj</button></td>
                             <td><button id="or_edt_${id}" ${status ? 'disabled' : ''}>Edytuj</button></td>
-                            <td><button id="or_del_${id}" ${status ? 'disabled' : ''}>Usuń</button></td>`;
+                            <td><button id="or_${buttonId}_${id}">${buttonText}</button></td>`;
 }
 
 async function editOrderForm(id) {
@@ -545,6 +557,10 @@ function patchOrderRow(order) {
     tableRow.innerHTML = orderTableRowCreating(order);
 }
 
+async function archiveOrder(archiveUrl, id){
+    await postToArchive(archiveUrl, JSON.stringify({"orderId": id}))
+}
+
 // MANAGEMENTS
 
 async function managementsLoading(url) {
@@ -554,6 +570,7 @@ async function managementsLoading(url) {
 }
 
 async function managementWindowOpen(id) {
+    await createVehicleList();
     temporaryOrder = await getEntity(ordersUrl, id);
     document.querySelector('#part_time').value = temporaryOrder.time.toString().substring(0,5);
     await orderBatchLoading(id);
@@ -597,11 +614,11 @@ async function partFormReader() {
     let amount = document.querySelector('#part_amount').value;
     let time = document.querySelector('#part_time').value;
 
-
     amount = parseFloat(amount);
     amount = amount < 0 ? 0 : amount;
     let vehicleEntity = await getEntity(vehiclesUrl, parseInt(vehicle.value));
-    amount = amount <= parseFloat(vehicleEntity.capacity) ? amount : parseFloat(vehicleEntity.capacity);
+    let vehCapacity = parseFloat(vehicleEntity.capacity);
+    amount = amount <= vehCapacity ? amount : vehCapacity;
 
     let vehicleTextValue = vehicle.options[vehicle.selectedIndex].text;
     amount = (vehicleAmountSum + amount >= orderAmount) ? orderAmount - vehicleAmountSum : amount;
@@ -656,11 +673,10 @@ function partTableHeaderRowCreating() {
 }
 
 function partTableRowCreating(vehicleData, amount, time) {
-    return `
-                            <td>${vehicleData}</td>
-                            <td class="table_amounts">${amount === 0 ? "-" : amount}</td>
-                            <td>${time.toString().substring(0, 5)}</td>
-                            <td><button id="pt_del_${partId}">Usuń</button></td>`;
+    return `    <td>${vehicleData}</td>
+                <td class="table_amounts">${amount === 0 ? "-" : amount}</td>
+                <td>${time.toString().substring(0, 5)}</td>
+                <td><button id="pt_del_${partId}">Usuń</button></td>`;
 }
 
 function footerDescriptionUpdate() {
@@ -683,8 +699,6 @@ async function createVehicleList() {
 }
 
 function managementTableFormReader() {
-    let start = "[";
-    let end = "]"
     let data = [];
     for (const part of temporaryBatchList) {
         data.push(JSON.stringify({
@@ -693,13 +707,13 @@ function managementTableFormReader() {
             "vehicle": {"id": part.vehicleId}
         }));
     }
-    return start + data + end;
+    return "[" + data + "]";
 }
 
 async function addingPlanHandler() {
     const data = managementTableFormReader();
     if (data !== "[]") {
-        await postToServer(managementsUrl, data)
+        await postToServer(managementsUrl, data);
     }
     await closingModal();
 }
@@ -711,7 +725,7 @@ async function createPlan(planTable) {
     }
     for (const row of Object.values(planTable)) {
         const tableRow = document.createElement('tr');
-        tableRow.setAttribute('id', "mg_row_" + row.id)
+        tableRow.setAttribute('id', "mg_row_" + row.id);
         tableRow.innerHTML = await managementTableRowCreating(row);
         table.appendChild(tableRow);
     }
@@ -719,14 +733,14 @@ async function createPlan(planTable) {
 
 async function managementTableRowCreating({id, amount, time, status, order, vehicle}) {
     return `<td><input id="pt_sts_${id}" type="checkbox" ${status ? 'checked' : ''}/></td>
-                            <td id="mg__td_${id}">${order.id}</td>
-                            <td>${vehicle.type}, ${vehicle.regNo}, ${vehicle.name}</td>
-                            <td>${order.client.name}</td>
-                            <td>${order.siteAddress}</td>
-                            <td>${amount}</td>
-                            <td>${order.date}, ${time.toString().substring(0, 5)}</td>
-                            <td><button id="mg_del_${id}" ${status ? 'disabled' : ''}>Usuń</button></td>
-                            <td><button id="mg_prt_${id}" ${status ? 'disabled' : ''}>WZ</button></td>`;
+            <td id="mg__td_${id}">${order.id}</td>
+            <td>${vehicle.type}, ${vehicle.regNo}, ${vehicle.name}</td>
+            <td>${order.client.name}</td>
+            <td>${order.siteAddress}</td>
+            <td>${amount !== 0.0 ? amount : "-"}${vehicle.type.includes("Pomp") ? "/P" : ""}</td>
+            <td>${order.date}, ${time.toString().substring(0, 5)}</td>
+            <td><button id="mg_del_${id}" ${status ? 'disabled' : ''}>Usuń</button></td>
+            <td><button id="mg_prt_${id}" ${status ? 'disabled' : ''}>WZ</button></td>`;
 }
 
 async function printHandler(id){
@@ -750,17 +764,11 @@ function clientFormReader() {
     let post_code = document.querySelector("#post_code");
     let city = document.querySelector("#city");
     let nip = document.querySelector("#nip");
-    if (clientAddModalActive === true) {
-        return JSON.stringify({
-            "name": client_name.value, "streetAndNo": street.value,
-            "postCode": post_code.value, "city": city.value, "nip": nip.value
-        });
-    } else {
-        return JSON.stringify({
-            "id": actualId, "name": client_name.value, "streetAndNo": street.value,
-            "postCode": post_code.value, "city": city.value, "nip": nip.value
-        });
-    }
+
+    return JSON.stringify({
+        "id": clientAddModalActive ? "" : actualId, "name": client_name.value,
+        "streetAndNo": street.value, "postCode": post_code.value, "city": city.value, "nip": nip.value
+    });
 }
 
 async function editClientForm(id) {
@@ -778,7 +786,7 @@ function clientModalFill({name, streetAndNo, postCode, city, nip}) {
 
 async function saveClient() {
     const data = clientFormReader();
-    const response = await postToServer(clientsUrl, data)
+    const response = await postToServer(clientsUrl, data);
     if (response !== null) {
         await closingModal();
         createClient(response);
@@ -796,8 +804,11 @@ async function patchClient(id) {
 
 function createClient(client) {
     const table = document.getElementById(clientsTableName);
+    if (table === null){
+        return;
+    }
     const tableRow = document.createElement('tr');
-    tableRow.setAttribute('id', "cl_row_" + client.id)
+    tableRow.setAttribute('id', "cl_row_" + client.id);
     tableRow.innerHTML = clientTableRowCreating(client);
     table.appendChild(tableRow);
 }
@@ -841,19 +852,11 @@ function vehicleFormReader() {
     let capacity_v = vehicle_type.value === "Pompa" ? 0.0 : capacity.value;
     let pump_length_v = vehicle_type.value === "Gruszka" ? 0.0 : pump_length.value;
 
-    if (vehicleAddModalActive === true) {
-        return JSON.stringify({
-            "id": "", "name": vehicle_name.value, "type": vehicle_type.value,
-            "capacity": capacity_v, "pumpLength": pump_length_v, "regNo": reg_no.value,
-            "description": description.value
-        });
-    } else {
-        return JSON.stringify({
-            "id": actualId, "name": vehicle_name.value, "type": vehicle_type.value,
-            "capacity": capacity_v, "pumpLength": pump_length_v, "regNo": reg_no.value,
-            "description": description.value
-        });
-    }
+    return JSON.stringify({
+        "id": vehicleAddModalActive ? "" : actualId, "name": vehicle_name.value, "type": vehicle_type.value,
+        "capacity": capacity_v, "pumpLength": pump_length_v, "regNo": reg_no.value,
+        "description": description.value
+    });
 }
 
 async function editVehicleForm(id) {
@@ -890,8 +893,11 @@ async function patchVehicle(id) {
 
 function createVehicle(vehicle) {
     const table = document.getElementById(vehiclesTableName);
+    if (table === null){
+        return;
+    }
     const tableRow = document.createElement('tr');
-    tableRow.setAttribute('id', "vh_row_" + vehicle.id)
+    tableRow.setAttribute('id', "vh_row_" + vehicle.id);
     tableRow.innerHTML = vehicleTableRowCreating(vehicle);
     table.appendChild(tableRow);
 }
@@ -902,15 +908,46 @@ function patchVehicleRow(vehicle) {
 }
 
 function vehicleTableRowCreating({id, name, type, capacity, pumpLength, regNo, description}) {
-    return `
-                            <td>${name}</td>
-                            <td>${type}</td>
-                            <td>${type === "Pompa" ? "-" : capacity}</td>
-                            <td>${type === "Gruszka" ? "-" : pumpLength}</td>
-                            <td>${regNo}</td>
-                            <td>${description}</td>
-                            <td><button id="vh_edt_${id}">Edytuj</button></td>
-                            <td><button id="vh_del_${id}">Usuń</button></td>`;
+    return `    <td>${name}</td>
+                <td>${type}</td>
+                <td>${type === "Pompa" ? "-" : capacity}</td>
+                <td>${type === "Gruszka" ? "-" : pumpLength}</td>
+                <td>${regNo}</td>
+                <td>${description}</td>
+                <td><button id="vh_edt_${id}">Edytuj</button></td>
+                <td><button id="vh_del_${id}">Usuń</button></td>`;
+}
+
+// ARCHIVE
+
+async function archiveLoading(url) {
+    const response = await getEntityList(url);
+    for (const resp of response) {
+        createArchive(resp);
+    }
+    tabButtonDisabling(archive_button_tab);
+}
+
+function createArchive(archiveRow) {
+    const table = document.getElementById(archiveTableName);
+    if (table === null){
+        return;
+    }
+    const tableRow = document.createElement('tr');
+    tableRow.innerHTML = archiveTableRowCreating(archiveRow);
+    table.appendChild(tableRow);
+}
+
+function archiveTableRowCreating(archiveRow) {
+    return `    <td>${archiveRow.dnNo}</td>
+                <td>${archiveRow.date}</td>
+                <td>${archiveRow.time.toString().substring(0, 5)}</td>
+                <td>${archiveRow.siteAddress}</td>
+                <td>${archiveRow.clientName + ", " + archiveRow.clientAddress + ", " + archiveRow.clientPostCode +
+                " " + archiveRow.clientCity + ", "  + archiveRow.clientNip}</td>
+                <td>${archiveRow.vehicleType + " " + archiveRow.vehicleName + " " + archiveRow.vehicleRegNo}</td>
+                <td>${archiveRow.concreteClass}</td>
+                <td>${archiveRow.amount}</td>`;
 }
 
 // SERVER OPERATIONS
@@ -927,6 +964,14 @@ async function postToServer(url, data) {
             }
             return resp.json();
         });
+}
+
+async function postToArchive(archiveUrl, data){
+    await fetch(archiveUrl, {
+        method: 'POST',
+        body: data,
+        headers: {'Content-Type': 'application/json'}
+    });
 }
 
 async function updateServerEntity(url, id, data) {
@@ -973,6 +1018,7 @@ async function deleteEntity(url, id) {
 // GENERAL HTML ELEMENTS
 
 async function tableCreating(tableName) {
+    await tableRemoving();
     const table = document.createElement('table');
     table.setAttribute('id', tableName);
     tableContainer.appendChild(table);
@@ -1018,10 +1064,21 @@ function tableHeaderRowCreating(tableName) {
             <th>opis</th>
             <th colspan="2">Edycja</th>`
         }
+        case archiveTableName: {
+            return `<th>nr wz</th>
+            <th>data</th>
+            <th>godzina</th>
+            <th>adres budowy</th>
+            <th>klient</th>
+            <th>pojazd</th>
+            <th>klasa betonu</th>
+            <th>ilość</th>`
+        }
     }
 }
 
-function sortOptionsCreating(tableName) {
+async function sortOptionsCreating(tableName) {
+    await sortOptionsRemoving();
     sortButton.style.display = "block";
     const selectList = document.createElement('select');
     selectList.setAttribute('id', "sort_" + tableName);
@@ -1059,6 +1116,12 @@ function createSortOptionsList(tableName) {
                         <option value="type,asc">typ rosnąco</option>
                         <option value="type,desc">typ malejąco</option>`
         }
+        case archiveTableName: {
+            return `<option value="dnNo,asc">nr wz rosnąco</option>
+                        <option value="dnNo,desc">nr wz malejąco</option>
+                        <option value="date,asc">data rosnąco</option>
+                        <option value="date,desc">data malejąco</option>`
+        }
     }
 }
 
@@ -1072,7 +1135,8 @@ function sortOptionsRemoving() {
 
 // PRINTING
 
-function print({wz_no, date, time, site_address, client_and_address, vehicle_name, vehicle_reg, amount, c_class}) {
+function print({wz_no, date, time, site_address, client_and_address,
+                   vehicle_name, vehicle_reg, vehicle_type, amount, c_class}) {
     const wzTemplate = document.getElementById("wz_print");
     const iframeWindow = wzTemplate.contentWindow;
     const iframeDocument = wzTemplate.contentDocument;
@@ -1087,6 +1151,8 @@ function print({wz_no, date, time, site_address, client_and_address, vehicle_nam
     iframeDocument.getElementById("wz_amount").textContent = amount;
     iframeDocument.getElementById("wz_class").textContent = c_class;
     iframeDocument.getElementById("wz_time").textContent = time;
+    iframeDocument.getElementById("wz_extras").textContent =
+        vehicle_type.toString().includes("Pomp") ? "Pompa" : "";
 
     iframeWindow.focus();
     iframeWindow.print();
