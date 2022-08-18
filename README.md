@@ -1,6 +1,7 @@
 ## CONCRETE PLANT MANAGEMENT
-Application for managing orders for concrete plants  
+
 Aplikacja do zarządzania zamówieniami w betoniarniach
+Application for managing orders for concrete plants  
 
 ### OPIS APLIKACJI
 
