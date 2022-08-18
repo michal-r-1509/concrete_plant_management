@@ -1,8 +1,5 @@
 ## CONCRETE PLANT MANAGEMENT
-<<<<<<< HEAD
-=======
 
->>>>>>> e9fe76f12528e2963ed8555a60a02986424f8fb1
 Aplikacja do zarządzania zamówieniami w betoniarniach
 
 Application for managing orders for concrete plants  
@@ -15,11 +12,8 @@ betoniarni. Ponadto, generuje odpowiednie dokumenty WZ
 (Wydanie Zewnętrzne) przeznaczone do okazania i podpisu
 przez odbiorców zamówienia.
 
-<<<<<<< HEAD
+
 ####OPIS UŻYTKOWANIA
-=======
-OPIS UŻYTKOWANIA
->>>>>>> e9fe76f12528e2963ed8555a60a02986424f8fb1
 
 Założeniem aplikacji jest rejestrowanie zamówień przyjmowanych
 od wcześniej zdefiniowanych klientów, a następnie dysponowanie 
@@ -48,12 +42,7 @@ na zarchiwizowanie zamowienia.
 Zamówienia zarchiwizowane pozwalają jedynie odczytać
 podstawowe informacje o zamówieniu i WZ.
 
-
-<<<<<<< HEAD
-###APPLICATION DESCRIPTION
-=======
 ### APPLICATION DESCRIPTION
->>>>>>> e9fe76f12528e2963ed8555a60a02986424f8fb1
 
 Application for registering orders and shipping planning 
 concrete batches on the construction site. Creates a 
@@ -62,11 +51,7 @@ Moreover, it generates relevant DN documents
 (Delivery Note) to be presented and signed
 by the recipients of the order.
 
-<<<<<<< HEAD
-####DESCRIPTION OF USE
-=======
-DESCRIPTION OF USE
->>>>>>> e9fe76f12528e2963ed8555a60a02986424f8fb1
+### DESCRIPTION OF USE
 
 The premise of the application is to register orders
 from predefined clients and then disposing single batches 
@@ -93,7 +78,6 @@ allows to archive the order.
 
 Archived orders allows only to read basic information
 about the order and the DN.
-<<<<<<< HEAD
 
 ###SCREENSHOTS
 
@@ -105,5 +89,3 @@ about the order and the DN.
 ![CPM - screenshot](screenshots/managements_tab.PNG)
 ![CPM - screenshot](screenshots/dn_print.PNG)
 ![CPM - screenshot](screenshots/archive_tab.PNG)
-=======
->>>>>>> e9fe76f12528e2963ed8555a60a02986424f8fb1
