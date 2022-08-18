@@ -10,7 +10,7 @@ betoniarni. Ponadto, generuje odpowiednie dokumenty WZ
 (Wydanie Zewnętrzne) przeznaczone do okazania i podpisu
 przez odbiorców zamówienia.
 
-####OPIS UŻYTKOWANIA
+OPIS UŻYTKOWANIA
 
 Założeniem aplikacji jest rejestrowanie zamówień przyjmowanych
 od wcześniej zdefiniowanych klientów, a następnie dysponowanie 
@@ -40,7 +40,7 @@ Zamówienia zarchiwizowane pozwalają jedynie odczytać
 podstawowe informacje o zamówieniu i WZ.
 
 
-###APPLICATION DESCRIPTION
+APPLICATION DESCRIPTION
 
 Application for registering orders and shipping planning 
 concrete batches on the construction site. Creates a 
@@ -49,7 +49,7 @@ Moreover, it generates relevant DN documents
 (Delivery Note) to be presented and signed
 by the recipients of the order.
 
-####DESCRIPTION OF USE
+DESCRIPTION OF USE
 
 The premise of the application is to register orders
 from predefined clients and then disposing single batches 
