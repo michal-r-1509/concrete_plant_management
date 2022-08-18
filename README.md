@@ -3,6 +3,7 @@ Application for managing orders for concrete plants
 Aplikacja do zarządzania zamówieniami w betoniarniach
 
 ### OPIS APLIKACJI
+
 Apilikacja do rejestrowania zamówień oraz planowania wysyłki 
 partii betonu na plac budowy. Tworzy bazę klientów oraz pojazdów 
 betoniarni. Ponadto, generuje odpowiednie dokumenty WZ 
@@ -10,6 +11,7 @@ betoniarni. Ponadto, generuje odpowiednie dokumenty WZ
 przez odbiorców zamówienia.
 
 ####OPIS UŻYTKOWANIA
+
 Założeniem aplikacji jest rejestrowanie zamówień przyjmowanych
 od wcześniej zdefiniowanych klientów, a następnie dysponowanie 
 pojedynczych partii betonu na budowę z użyciem pojazdów zawartych 
@@ -39,6 +41,7 @@ podstawowe informacje o zamówieniu i WZ.
 
 
 ###APPLICATION DESCRIPTION
+
 Application for registering orders and shipping planning 
 concrete batches on the construction site. Creates a 
 database of customers and vehicles of concrete plant. 
@@ -47,6 +50,7 @@ Moreover, it generates relevant DN documents
 by the recipients of the order.
 
 ####DESCRIPTION OF USE
+
 The premise of the application is to register orders
 from predefined clients and then disposing single batches 
 of concrete to construction site with the use of vehicles  
