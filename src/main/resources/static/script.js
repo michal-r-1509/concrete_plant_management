@@ -575,7 +575,7 @@ async function orderBatchLoading(id) {
         for (const resp of Object.values(response)) {
             addPartToTemporaryBatchList(resp.id, resp.vehicle.id, resp.vehicle.type, resp.vehicle.regNo,
                 resp.vehicle.name, resp.amount, resp.time, false);
-            let vehicleTypeAndName = resp.vehicle.type + " " + resp.vehicle.regNo + " " + resp.vehicle.name;
+            let vehicleTypeAndName = vehicleTypeParser(resp.vehicle.type) + " " + resp.vehicle.regNo + " " + resp.vehicle.name;
             await createPart(vehicleTypeAndName, resp.amount, resp.time);
         }
     }
