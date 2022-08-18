@@ -12,7 +12,7 @@ class OrderBatchWriteModel {
     @Setter
     private int id;
     private int batchId;
-    private float amount;
+    private double amount;
     private LocalTime time;
     private boolean toDelete;
     private Order order;

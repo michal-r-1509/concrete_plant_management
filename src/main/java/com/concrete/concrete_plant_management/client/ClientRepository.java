@@ -4,6 +4,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-interface ClientRepository extends JpaRepository<Client, Integer> {
-    boolean existsClientByNip(long nip);
+interface ClientRepository extends JpaRepository<Client, Integer>, ClientCustomMethods {
+
 }

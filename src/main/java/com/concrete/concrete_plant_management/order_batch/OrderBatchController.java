@@ -1,6 +1,8 @@
 package com.concrete.concrete_plant_management.order_batch;
 
+import com.concrete.concrete_plant_management.order.event.OrderStatus;
 import com.concrete.concrete_plant_management.vehicle.Vehicle;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,9 +18,11 @@ import java.util.List;
 class OrderBatchController {
 
     private final OrderBatchService orderBatchService;
+    private final ApplicationEventPublisher publisher;
 
-    public OrderBatchController(final OrderBatchService orderBatchService) {
+    public OrderBatchController(final OrderBatchService orderBatchService, final ApplicationEventPublisher publisher) {
         this.orderBatchService = orderBatchService;
+        this.publisher = publisher;
     }
 
     @PostMapping
@@ -30,9 +34,8 @@ class OrderBatchController {
     @Transactional
     @PatchMapping("/{id}")
     ResponseEntity<?> inverseOrderBatchStatus(@PathVariable int id){
-        if(!orderBatchService.inverseStatus(id)) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
+        OrderStatus orderStatus = orderBatchService.inverseStatus(id);
+        publisher.publishEvent(orderStatus);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
@@ -64,11 +67,7 @@ class OrderBatchController {
 
     @DeleteMapping("/{id}")
     ResponseEntity<Vehicle> deleteVehicle(@PathVariable int id) {
-        boolean isDeleted = orderBatchService.deleteOrderBatch(id);
-        if (isDeleted) {
-            return ResponseEntity.noContent().build();
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+        orderBatchService.deleteOrderBatch(id);
+        return ResponseEntity.noContent().build();
     }
 }

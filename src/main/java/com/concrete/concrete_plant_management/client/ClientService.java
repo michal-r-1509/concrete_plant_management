@@ -1,26 +1,28 @@
 package com.concrete.concrete_plant_management.client;
 
-import com.concrete.concrete_plant_management.order.OrderService;
+import com.concrete.concrete_plant_management.exceptions.ElementConflictException;
+import com.concrete.concrete_plant_management.exceptions.ElementNotFoundException;
+import com.concrete.concrete_plant_management.order.OrderGlobalDao;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
-public class ClientService {
+class ClientService {
 
-    private final ClientRepository repository;
-    private final OrderService orderService;
+    private final ClientCustomMethods repository;
+    private final OrderGlobalDao orderGlobalDao;
 
-    public ClientService(final ClientRepository repository,
-                         final OrderService orderService) {
+    public ClientService(final ClientCustomMethods repository,
+                         final OrderGlobalDao orderGlobalDao) {
         this.repository = repository;
-        this.orderService = orderService;
+        this.orderGlobalDao = orderGlobalDao;
     }
 
     Client saveClient(Client toSave) {
         if (repository.existsClientByNip(toSave.getNip())){
-            return null;
+            throw new ElementConflictException("client with nip number", String.valueOf(toSave.getNip()));
         }
         ClientDataValidation clientDataValidation = new ClientDataValidation();
         Client result = clientDataValidation.clientModelValidating(toSave);
@@ -28,7 +30,7 @@ public class ClientService {
     }
 
     Client getClient(int id){
-        return repository.findById(id).orElse(null);
+        return repository.findById(id).orElseThrow(() -> new ElementNotFoundException("client", id));
     }
 
     List<Client> getAllClients(){
@@ -36,21 +38,24 @@ public class ClientService {
     }
 
     Client updateClient(final int id, final Client toUpdate) {
-        if (!repository.existsById(id)) {
-            return null;
+        if (repository.existsById(id)) {
+            ClientDataValidation clientDataValidation = new ClientDataValidation();
+            Client result = clientDataValidation.clientModelValidating(toUpdate);
+            repository.save(toUpdate);
+            return result;
         }
-        ClientDataValidation clientDataValidation = new ClientDataValidation();
-        Client result = clientDataValidation.clientModelValidating(toUpdate);
-        repository.save(toUpdate);
-        return result;
+        throw new ElementNotFoundException("client", id);
     }
 
-    public boolean deleteClient(final int id) {
-        if (repository.existsById(id) && !orderService.existsOrderByClientId(id)){
-            repository.deleteById(id);
-            return true;
+    public void deleteClient(final int id) {
+        if (repository.existsById(id)){
+            if (orderGlobalDao.existsOrderByClientId(id)){
+                throw new ElementConflictException("client in active order");
+            }else{
+                repository.deleteById(id);
+            }
         }else{
-            return false;
+            throw new ElementNotFoundException("client", id);
         }
     }
 

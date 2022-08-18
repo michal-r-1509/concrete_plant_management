@@ -1,22 +1,25 @@
 package com.concrete.concrete_plant_management;
 
-import org.springframework.http.HttpHeaders;
+import com.concrete.concrete_plant_management.exceptions.ElementConflictException;
+import com.concrete.concrete_plant_management.exceptions.ElementNotFoundException;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-import javax.validation.ConstraintViolationException;
-
-@ControllerAdvice
+@RestControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
-    @ExceptionHandler(ConstraintViolationException.class)
-    protected ResponseEntity<?> constExceptionHandler(RuntimeException ex, WebRequest request){
-        String bodyOfResponse = "Bad number format. Enter correct number";
-        return handleExceptionInternal(ex, bodyOfResponse, new HttpHeaders(), HttpStatus.NOT_ACCEPTABLE, request);
+    @ExceptionHandler(ElementNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public String elementNotFoundHandler(ElementNotFoundException ex){
+        return ex.getMessage() + " with id " + ex.getId() + " not found";
     }
 
+    @ExceptionHandler(ElementConflictException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public String elementConflict(ElementConflictException ex){
+        return ex.getMessage() + " already exists";
+    }
 }

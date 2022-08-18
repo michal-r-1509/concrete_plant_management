@@ -344,17 +344,10 @@ async function sortHandler() {
 async function statusCheckboxHandler(checkbox) {
     let rowId = (checkbox.parentElement.parentElement).id;
     let id = idPreparer(checkbox.getAttribute('id'));
-    let status = checkbox.checked;
-    if (checkbox.id.includes("or_sts")) {
-        let response = await orderStatusHandler(id);
-        if (response){
-            editButtonsDisplay(rowId, status);
-        }
-    } else if (checkbox.id.includes("pt_sts")) {
+    let isChecked = checkbox.checked;
+    if (checkbox.id.includes("pt_sts")) {
         let response = await orderBatchStatusHandler(id);
-        if (response){
-            editButtonsDisplay(rowId, status);
-        }
+        editButtonsDisplay(rowId, isChecked);
     }
 }
 
@@ -436,10 +429,10 @@ function tableRemoving() {
 
 function displayOrderRowsHandler(id){
     if (id.includes("display_done")){
-        displayState = "&status=true";
+        displayState = "&done=true";
         displayStateUrl = "/search"
     }else if (id.includes("display_undone")){
-        displayState = "&status=false";
+        displayState = "&done=false";
         displayStateUrl = "/search"
     }else{
         displayState = "";
@@ -484,10 +477,6 @@ async function saveOrder() {
     }
 }
 
-async function orderStatusHandler(id) {
-    await patchServerEntity(ordersUrl, id);
-}
-
 function createOrder(order) {
     const table = document.getElementById(ordersTableName);
     if (table === null){
@@ -499,17 +488,17 @@ function createOrder(order) {
     table.appendChild(tableRow);
 }
 
-function orderTableRowCreating({id, date, time, amount, siteAddress, status, pump, client}) {
-    let buttonText = status ? "archiwizuj" : "usuń";
-    let buttonId = status ? "arc" : "del";
-    return `<td><input id="or_sts_${id}" type="checkbox" disabled ${status ? 'checked' : ''}/></td>
+function orderTableRowCreating({id, date, time, amount, siteAddress, done, pump, client}) {
+    let buttonText = done ? "archiwizuj" : "usuń";
+    let buttonId = done ? "arc" : "del";
+    return `<td><input id="or_sts_${id}" type="checkbox" disabled ${done ? 'checked' : ''}/></td>
                             <td>${client.name}${siteAddress === "" ? "" : ", " + siteAddress}</td>
                             <td>${id}</td>
                             <td>${date}</td>
                             <td>${time.toString().substring(0, 5)}</td>
                             <td>${amount}${pump ? " + P" : ""}</td>
-                            <td><button id="or_mng_${id}" ${status ? 'disabled' : ''}>Zaplanuj</button></td>
-                            <td><button id="or_edt_${id}" ${status ? 'disabled' : ''}>Edytuj</button></td>
+                            <td><button id="or_mng_${id}" ${done ? 'disabled' : ''}>Zaplanuj</button></td>
+                            <td><button id="or_edt_${id}" ${done ? 'disabled' : ''}>Edytuj</button></td>
                             <td><button id="or_${buttonId}_${id}">${buttonText}</button></td>`;
 }
 
@@ -593,7 +582,7 @@ async function orderBatchLoading(id) {
 }
 
 async function orderBatchStatusHandler(id) {
-    await patchServerEntity(managementsUrl, id);
+    return await patchServerEntity(managementsUrl, id);
 }
 
 async function managementFooterModalFill({pump, description}) {
@@ -692,7 +681,7 @@ async function createVehicleList() {
     for (const vehicle of vehicleList) {
         let listElement = document.createElement("option");
         listElement.value = vehicle.id;
-        listElement.text = vehicle.type + ", " + vehicle.regNo + ", " + vehicle.name;
+        listElement.text = vehicleTypeParser(vehicle.type) + ", " + vehicle.regNo + ", " + vehicle.name;
         selectTag.appendChild(listElement);
     }
     vehicleSelectedList.appendChild(selectTag);
@@ -731,16 +720,16 @@ async function createPlan(planTable) {
     }
 }
 
-async function managementTableRowCreating({id, amount, time, status, order, vehicle}) {
-    return `<td><input id="pt_sts_${id}" type="checkbox" ${status ? 'checked' : ''}/></td>
+async function managementTableRowCreating({id, amount, time, done, order, vehicle}) {
+    return `<td><input id="pt_sts_${id}" type="checkbox" ${done ? 'checked' : ''}/></td>
             <td id="mg__td_${id}">${order.id}</td>
-            <td>${vehicle.type}, ${vehicle.regNo}, ${vehicle.name}</td>
+            <td>${vehicleTypeParser(vehicle.type)}, ${vehicle.regNo}, ${vehicle.name}</td>
             <td>${order.client.name}</td>
             <td>${order.siteAddress}</td>
-            <td>${amount !== 0.0 ? amount : "-"}${vehicle.type.includes("Pomp") ? "/P" : ""}</td>
+            <td>${amount !== 0.0 ? amount : "-"}${vehicle.type === 3 ? "/P" : ""}</td>
             <td>${order.date}, ${time.toString().substring(0, 5)}</td>
-            <td><button id="mg_del_${id}" ${status ? 'disabled' : ''}>Usuń</button></td>
-            <td><button id="mg_prt_${id}" ${status ? 'disabled' : ''}>WZ</button></td>`;
+            <td><button id="mg_del_${id}" ${done ? 'disabled' : ''}>Usuń</button></td>
+            <td><button id="mg_prt_${id}" ${done ? 'disabled' : ''}>WZ</button></td>`;
 }
 
 async function printHandler(id){
@@ -849,12 +838,9 @@ function vehicleFormReader() {
     let reg_no = document.querySelector("#reg_no");
     let description = document.querySelector('#vehicle_description');
 
-    let capacity_v = vehicle_type.value === "Pompa" ? 0.0 : capacity.value;
-    let pump_length_v = vehicle_type.value === "Gruszka" ? 0.0 : pump_length.value;
-
     return JSON.stringify({
         "id": vehicleAddModalActive ? "" : actualId, "name": vehicle_name.value, "type": vehicle_type.value,
-        "capacity": capacity_v, "pumpLength": pump_length_v, "regNo": reg_no.value,
+        "capacity": capacity.value, "pumpLength": pump_length.value, "regNo": reg_no.value,
         "description": description.value
     });
 }
@@ -909,13 +895,22 @@ function patchVehicleRow(vehicle) {
 
 function vehicleTableRowCreating({id, name, type, capacity, pumpLength, regNo, description}) {
     return `    <td>${name}</td>
-                <td>${type}</td>
-                <td>${type === "Pompa" ? "-" : capacity}</td>
-                <td>${type === "Gruszka" ? "-" : pumpLength}</td>
+                <td>${vehicleTypeParser(type)}</td>
+                <td>${type === 3 ? "-" : capacity}</td>
+                <td>${type === 1 ? "-" : pumpLength}</td>
                 <td>${regNo}</td>
                 <td>${description}</td>
                 <td><button id="vh_edt_${id}">Edytuj</button></td>
                 <td><button id="vh_del_${id}">Usuń</button></td>`;
+}
+
+function vehicleTypeParser(type){
+    switch (type){
+        case 1: return "gruszka";
+        case 2: return "pompo-gruszka";
+        case 3: return "pompa";
+        default: "-";
+    }
 }
 
 // ARCHIVE
@@ -947,7 +942,7 @@ function archiveTableRowCreating(archiveRow) {
                 " " + archiveRow.clientCity + ", "  + archiveRow.clientNip}</td>
                 <td>${archiveRow.vehicleType + " " + archiveRow.vehicleName + " " + archiveRow.vehicleRegNo}</td>
                 <td>${archiveRow.concreteClass}</td>
-                <td>${archiveRow.amount}</td>`;
+                <td>${archiveRow.amount === 0.0 ? "-" : archiveRow.amount}</td>`;
 }
 
 // SERVER OPERATIONS
@@ -1099,8 +1094,8 @@ function createSortOptionsList(tableName) {
                         <option value="amount,desc">ilość malejąco</option>`
         }
         case managementsTableName: {
-            return `<option value="order.date,asc&time,asc">czas rosnąco</option>
-                        <option value="order.date,desc&time,desc">czas malejąco</option>`
+            return `<option value="order.date,asc&sort=time,asc">czas rosnąco</option>
+                        <option value="order.date,desc&sort=time,desc">czas malejąco</option>`
         }
         case clientsTableName: {
             return `<option value="name,asc">nazwa rosnąco</option>
@@ -1119,8 +1114,8 @@ function createSortOptionsList(tableName) {
         case archiveTableName: {
             return `<option value="dnNo,asc">nr wz rosnąco</option>
                         <option value="dnNo,desc">nr wz malejąco</option>
-                        <option value="date,asc">data rosnąco</option>
-                        <option value="date,desc">data malejąco</option>`
+                        <option value="date,asc&sort=time,asc">data rosnąco</option>
+                        <option value="date,desc&sort=time,desc">data malejąco</option>`
         }
     }
 }
@@ -1135,24 +1130,24 @@ function sortOptionsRemoving() {
 
 // PRINTING
 
-function print({wz_no, date, time, site_address, client_and_address,
+function print({dn_no, date, time, site_address, client_and_address,
                    vehicle_name, vehicle_reg, vehicle_type, amount, c_class}) {
-    const wzTemplate = document.getElementById("wz_print");
-    const iframeWindow = wzTemplate.contentWindow;
-    const iframeDocument = wzTemplate.contentDocument;
+    const dnTemplate = document.getElementById("dn_print");
+    const iframeWindow = dnTemplate.contentWindow;
+    const iframeDoc = dnTemplate.contentDocument;
 
-    iframeDocument.getElementById("wz_title").textContent = wz_no;
-    iframeDocument.getElementById("wz_no").textContent = wz_no;
-    iframeDocument.getElementById("wz_date").textContent = date;
-    iframeDocument.getElementById("wz_address").textContent = site_address;
-    iframeDocument.getElementById("wz_client").textContent = client_and_address;
-    iframeDocument.getElementById("wz_veh_name").textContent = vehicle_name;
-    iframeDocument.getElementById("wz_veh_reg").textContent = vehicle_reg;
-    iframeDocument.getElementById("wz_amount").textContent = amount;
-    iframeDocument.getElementById("wz_class").textContent = c_class;
-    iframeDocument.getElementById("wz_time").textContent = time;
-    iframeDocument.getElementById("wz_extras").textContent =
-        vehicle_type.toString().includes("Pomp") ? "Pompa" : "";
+    iframeDoc.getElementById("dn_title").textContent = dn_no;
+    iframeDoc.getElementById("dn_no").textContent = dn_no;
+    iframeDoc.getElementById("dn_date").textContent = date;
+    iframeDoc.getElementById("dn_address").textContent = site_address;
+    iframeDoc.getElementById("dn_client").textContent = client_and_address;
+    iframeDoc.getElementById("dn_veh_name").textContent = vehicle_name;
+    iframeDoc.getElementById("dn_veh_reg").textContent = vehicle_reg;
+    iframeDoc.getElementById("dn_amount").textContent = amount;
+    iframeDoc.getElementById("dn_class").textContent = c_class;
+    iframeDoc.getElementById("dn_time").textContent = time;
+    iframeDoc.getElementById("dn_extras").textContent =
+        vehicle_type === 2 || vehicle_type === 3 ? "Pompa" : "";
 
     iframeWindow.focus();
     iframeWindow.print();

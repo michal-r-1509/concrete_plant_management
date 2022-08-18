@@ -71,13 +71,17 @@ a {
 nav {
     display: flex;
     justify-content: center;
-    padding: 10px;
+    padding: 5px;
+}
+
+nav p{
+    margin-bottom: 0px;
 }
 
 main {
     display: flex;
     align-items: stretch;
-    padding: 10px;
+    padding: 5px;
 }
 
 aside {
@@ -96,7 +100,7 @@ section {
 
 article {
     padding: 10px;
-    height: 400px;
+    height: 390px;
     border: 2px solid lightgray;
     border-radius: 15px;
     background-color: rgba(131, 137, 150, 0.5);
@@ -109,7 +113,7 @@ footer {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 10px;
+    padding: 5px;
 }
 
 footer button {
@@ -317,6 +321,12 @@ label {
 input:invalid {
     border: 2px solid #de2828;
     border-radius: 2px;
+}
+
+.author{
+    display: flex;
+    padding-right: 10px;
+    justify-content: right;
 }
 
 iframe {

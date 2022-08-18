@@ -1,5 +1,7 @@
 package com.concrete.concrete_plant_management.vehicle;
 
+import com.concrete.concrete_plant_management.exceptions.ElementConflictException;
+import com.concrete.concrete_plant_management.exceptions.ElementNotFoundException;
 import com.concrete.concrete_plant_management.order_batch.OrderBatchService;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -7,35 +9,35 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-public class VehicleService {
+class VehicleService{
 
-    private final VehicleRepository repository;
+    private final VehicleCustomMethods repository;
     private final OrderBatchService orderBatchService;
 
-    public VehicleService(final VehicleRepository repository,
+    public VehicleService(final VehicleCustomMethods repository,
                           final OrderBatchService orderBatchService) {
         this.repository = repository;
         this.orderBatchService = orderBatchService;
     }
 
     Vehicle saveVehicle(final Vehicle toSave) {
-        if (repository.existsByRegNo(toSave.getRegNo())){
-            return null;
-        }
         new VehicleDataValidation().vehicleDataValidation(toSave);
+        if (repository.existsByRegNo(toSave.getRegNo())) {
+            throw new ElementConflictException("vehicle with registry number", toSave.getRegNo());
+        }
         return repository.save(toSave);
     }
 
-    Vehicle vehicleUpdate(final int id, final Vehicle toUpdate) {
-        if (!repository.existsById(id)) {
-            return null;
+    Vehicle updateVehicle(final int id, final Vehicle toUpdate) {
+        if (repository.existsById(id)) {
+            new VehicleDataValidation().vehicleDataValidation(toUpdate);
+            return repository.save(toUpdate);
         }
-        new VehicleDataValidation().vehicleDataValidation(toUpdate);
-        return repository.save(toUpdate);
+        throw new ElementNotFoundException("vehicle", id);
     }
 
-    Vehicle readVehicle(final int id) {
-        return repository.findById(id).orElse(null);
+    public Vehicle readVehicle(final int id) {
+        return repository.findById(id).orElseThrow(() -> new ElementNotFoundException("vehicle", id));
     }
 
     List<Vehicle> readAllVehicles() {
@@ -46,12 +48,16 @@ public class VehicleService {
         return repository.findAll(sort);
     }
 
-    boolean deleteVehicle(final int id) {
-        if (repository.existsById(id) && !orderBatchService.existsOrderBatchByVehicleId(id)) {
-            repository.deleteById(id);
-            return true;
-        } else {
-            return false;
+    void deleteVehicle(final int id) {
+        if (repository.existsById(id)){
+            if (orderBatchService.existsOrderBatchByVehicleId(id)){
+                throw new ElementConflictException("vehicle in orderBatch");
+            }else{
+                repository.deleteById(id);
+            }
+        }else{
+            throw new ElementNotFoundException("vehicle", id);
         }
     }
+
 }

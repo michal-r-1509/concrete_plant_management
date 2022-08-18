@@ -5,13 +5,13 @@ public record PostCode(String postCode) {
     @Override
     public String toString() {
         if (postCode.length() < 5 || postCode.length() > 6){
-            return "bad post code format";
+            return "";
         }
         else if(postCode.length() == 6 && '-' == postCode.charAt(2)){
             return postCode;
         }
         else if (postCode.length() == 6){
-            return "bad post code format";
+            return "";
         }
         else {
             return postCode.substring(0, 2) + "-" + postCode.substring(2);

@@ -26,6 +26,7 @@ public class Order {
     private LocalDate date;
     @NotNull(message = "time cannot be null")
     private LocalTime time;
+    @Setter
     @Min(0)
     private double amount;
     private String concreteClass;
@@ -33,29 +34,9 @@ public class Order {
     private String description;
     private boolean pump;
     @Setter
-    private boolean status;
+    private boolean done;
     @ManyToOne
     @JoinColumn(name = "client_id", referencedColumnName = "id")
     private Client client;
 
-//
-    public Order(final LocalDate date, final LocalTime time, final double amount, final String concreteClass,
-                 final String siteAddress, final String description, final boolean pump, final boolean status,
-                 final Client client) {
-        this.date = date;
-        this.time = time;
-        this.amount = amount;
-        this.concreteClass = concreteClass;
-        this.siteAddress = siteAddress;
-        this.description = description;
-        this.pump = pump;
-        this.status = status;
-        this.client = client;
-    }
-
-    public Order(final int id) {
-        this.id = id;
-    }
-
-    //
 }

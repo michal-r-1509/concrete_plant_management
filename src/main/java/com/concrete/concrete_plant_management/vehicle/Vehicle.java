@@ -10,6 +10,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
 
 @Getter
 @Setter
@@ -22,23 +23,14 @@ public class Vehicle {
     @GeneratedValue(generator = "inc")
     @GenericGenerator(name = "inc", strategy = "increment")
     private int id;
+    @NotBlank(message = "name connot be empty")
+    @Size(min = 1, max = 50)
     private String name;
-    private String type;
+    private int type;
     @NotBlank
     private String regNo;
     private String description;
-    private float capacity;
-    private float pumpLength;
+    private double capacity;
+    private double pumpLength;
 
-//    do usuniecia
-    public Vehicle(final String name, final String type, final String regNo, final String description,
-                   final float capacity, final float pumpLength) {
-        this.name = name;
-        this.type = type;
-        this.regNo = regNo;
-        this.description = description;
-        this.capacity = capacity;
-        this.pumpLength = pumpLength;
-    }
-//
 }

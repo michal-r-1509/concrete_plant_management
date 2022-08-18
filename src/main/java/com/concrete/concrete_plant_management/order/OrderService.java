@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-public class OrderService {
+class OrderService{
     private final OrderCustomMethods repository;
     private final OrderBatchService orderBatchService;
 
@@ -27,11 +27,11 @@ public class OrderService {
     }
 
     public Order updateOrder(final int id, final Order toUpdate) {
-        if (!repository.existsById(id)) {
-            throw new ElementNotFoundException("order", id);
+        if (repository.existsById(id)) {
+            orderBatchService.updateOrderBatches(toUpdate);
+            return repository.save(toUpdate);
         }
-        orderBatchService.updateOrderBatches(toUpdate);
-        return repository.save(toUpdate);
+        throw new ElementNotFoundException("order", id);
     }
 
     public List<Order> getAllOrders() {
@@ -51,7 +51,7 @@ public class OrderService {
 
     public List<Order> getAllOrdersByState(final boolean status, final Sort sort) {
         return getAllOrders(sort).stream()
-                .filter(order -> order.isStatus() == status)
+                .filter(order -> order.isDone() == status)
                 .collect(Collectors.toList());
     }
 
@@ -63,20 +63,5 @@ public class OrderService {
         } else {
             throw new ElementNotFoundException("order", id);
         }
-    }
-
-    public void inverseStatus(final int id) {
-        Order toUpdate = repository.findById(id).orElseThrow(() -> new ElementNotFoundException("order", id));
-        if (toUpdate.getAmount() == orderBatchService.orderBatchesAmountSumByOrderId(id)){
-            toUpdate.setStatus(!toUpdate.isStatus());
-            orderBatchService.setStatusToAllOrderBatches(id, toUpdate.isStatus());
-        }else{
-            System.out.println("suma: " + orderBatchService.orderBatchesAmountSumByOrderId(id));
-            throw new IllegalArgumentException("order is not completed");
-        }
-    }
-
-    public boolean existsOrderByClientId(final int id) {
-        return repository.existsOrderByClient_Id(id);
     }
 }

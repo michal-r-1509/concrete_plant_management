@@ -16,7 +16,11 @@ class ClientDataValidation {
     }
 
     String firstCharToUpperCase(String word){
-        char firstChar = word.charAt(0);
-        return (Character.toString(firstChar).toUpperCase().concat(word.substring(1)));
+        if (word.isBlank() || word.isEmpty()){
+            return "";
+        }
+        String result = word.trim();
+        char firstChar = result.charAt(0);
+        return (Character.toString(firstChar).toUpperCase().concat(result.substring(1)));
     }
 }
