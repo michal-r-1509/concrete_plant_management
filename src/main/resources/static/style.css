@@ -329,6 +329,14 @@ input:invalid {
     justify-content: right;
 }
 
+#part_amount, #duration{
+    width: 50px;
+}
+
+#part_time{
+    width: 60px;
+}
+
 iframe {
     visibility: hidden;
     position: fixed;

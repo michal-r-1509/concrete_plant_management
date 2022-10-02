@@ -836,12 +836,10 @@ function vehicleFormReader() {
     let capacity = document.querySelector("#capacity");
     let pump_length = document.querySelector("#pump_length");
     let reg_no = document.querySelector("#reg_no");
-    let description = document.querySelector('#vehicle_description');
 
     return JSON.stringify({
         "id": vehicleAddModalActive ? "" : actualId, "name": vehicle_name.value, "type": vehicle_type.value,
-        "capacity": capacity.value, "pumpLength": pump_length.value, "regNo": reg_no.value,
-        "description": description.value
+        "capacity": capacity.value, "pumpLength": pump_length.value, "regNo": reg_no.value
     });
 }
 
@@ -850,13 +848,12 @@ async function editVehicleForm(id) {
     await vehicleModalFill(data);
 }
 
-function vehicleModalFill({name, type, capacity, pumpLength, regNo, description}) {
+function vehicleModalFill({name, type, capacity, pumpLength, regNo}) {
     document.querySelector("#vehicle_name").value = name;
     document.querySelector('#vehicle_type').value = type;
     document.querySelector("#capacity").value = capacity;
     document.querySelector("#pump_length").value = pumpLength;
     document.querySelector("#reg_no").value = regNo;
-    document.querySelector('#vehicle_description').value = description;
 }
 
 async function saveVehicle() {
@@ -893,22 +890,21 @@ function patchVehicleRow(vehicle) {
     tableRow.innerHTML = vehicleTableRowCreating(vehicle);
 }
 
-function vehicleTableRowCreating({id, name, type, capacity, pumpLength, regNo, description}) {
+function vehicleTableRowCreating({id, name, type, capacity, pumpLength, regNo}) {
     return `    <td>${name}</td>
                 <td>${vehicleTypeParser(type)}</td>
-                <td>${type === 3 ? "-" : capacity}</td>
-                <td>${type === 1 ? "-" : pumpLength}</td>
+                <td>${type === "PUMP" ? "-" : capacity}</td>
+                <td>${type === "MIXER" ? "-" : pumpLength}</td>
                 <td>${regNo}</td>
-                <td>${description}</td>
                 <td><button id="vh_edt_${id}">Edytuj</button></td>
                 <td><button id="vh_del_${id}">Usuń</button></td>`;
 }
 
 function vehicleTypeParser(type){
     switch (type){
-        case 1: return "gruszka";
-        case 2: return "pompo-gruszka";
-        case 3: return "pompa";
+        case "MIXER": return "gruszka";
+        case "MIXER_PUMP": return "pompo-gruszka";
+        case "PUMP": return "pompa";
         default: "-";
     }
 }
@@ -1056,7 +1052,6 @@ function tableHeaderRowCreating(tableName) {
             <th>pojemność</th>
             <th>długość pompy</th>
             <th>nr rejestr.</th>
-            <th>opis</th>
             <th colspan="2">Edycja</th>`
         }
         case archiveTableName: {
@@ -1147,7 +1142,7 @@ function print({dn_no, date, time, site_address, client_and_address,
     iframeDoc.getElementById("dn_class").textContent = c_class;
     iframeDoc.getElementById("dn_time").textContent = time;
     iframeDoc.getElementById("dn_extras").textContent =
-        vehicle_type === 2 || vehicle_type === 3 ? "Pompa" : "";
+        vehicle_type === "MIXER_PUMP" || vehicle_type === "PUMP" ? "Pompa" : "";
 
     iframeWindow.focus();
     iframeWindow.print();

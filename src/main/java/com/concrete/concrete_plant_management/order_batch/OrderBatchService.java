@@ -3,8 +3,9 @@ package com.concrete.concrete_plant_management.order_batch;
 import com.concrete.concrete_plant_management.exceptions.ElementNotFoundException;
 import com.concrete.concrete_plant_management.order.Order;
 import com.concrete.concrete_plant_management.order.event.OrderStatus;
-import com.concrete.concrete_plant_management.vehicle.Vehicle;
-import com.concrete.concrete_plant_management.vehicle.VehicleGlobalDao;
+import com.concrete.concrete_plant_management.domain.Vehicle;
+import com.concrete.concrete_plant_management.vehicle.service.VehicleGlobalDao;
+import com.concrete.concrete_plant_management.vehicle.tool.VehicleType;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
@@ -38,7 +39,7 @@ public class OrderBatchService {
                 .filter(orderBatch -> !orderBatch.isToDelete())
                 .filter(orderBatch -> {
                     Vehicle vehicle = vehicleGlobalDao.getVehicle(orderBatch.getVehicle().getId());
-                    return !(orderBatch.getAmount() == 0.0 && vehicle.getType() == 1);
+                    return !(orderBatch.getAmount() == 0.0 && vehicle.getType().equals(VehicleType.MIXER));
                 })
                 .map(this::toOrderBatch)
                 .map(repository::save)

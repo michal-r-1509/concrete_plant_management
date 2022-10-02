@@ -3,6 +3,10 @@ package com.concrete.concrete_plant_management.vehicle;
 import com.concrete.concrete_plant_management.exceptions.ElementConflictException;
 import com.concrete.concrete_plant_management.exceptions.ElementNotFoundException;
 import com.concrete.concrete_plant_management.order_batch.OrderBatchService;
+import com.concrete.concrete_plant_management.vehicle.dto.VehicleRequestDTO;
+import com.concrete.concrete_plant_management.vehicle.repository.VehicleRepositoryMethods;
+import com.concrete.concrete_plant_management.vehicle.service.VehicleServiceImpl;
+import com.concrete.concrete_plant_management.vehicle.tool.VehicleType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -15,24 +19,24 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
-class VehicleServiceTest {
+class VehicleServiceImplTest {
 
     @Mock
-    private VehicleCustomMethods repository;
+    private VehicleRepositoryMethods repository;
     @Mock
     private OrderBatchService orderBatchService;
-    private VehicleService service;
+    private VehicleServiceImpl service;
 
     @BeforeEach
     public void setup() {
         MockitoAnnotations.openMocks(this);
-        service = new VehicleService(repository, orderBatchService);
+        service = new VehicleServiceImpl(repository, orderBatchService);
     }
 
     @Test
     @DisplayName("throws ElementConflictException when vehicle with registry number already exists")
     void saveVehicle_throwsElementConflictException(){
-        Vehicle vehicle = getVehicleObject();
+        VehicleRequestDTO vehicle = getVehicleDTO();
         when(repository.existsByRegNo(anyString())).thenReturn(true);
 
         var exception = catchThrowable(() -> service.saveVehicle(vehicle));
@@ -42,7 +46,7 @@ class VehicleServiceTest {
     @Test
     @DisplayName("throws ElementNotFoundException when vehicle not exists")
     void updateVehicle_throwsElementNotFoundException(){
-        Vehicle vehicle = getVehicleObject();
+        VehicleRequestDTO vehicle = getVehicleDTO();
         when(repository.existsById(anyInt())).thenReturn(false);
 
         var exception = catchThrowable(() -> service.updateVehicle(anyInt(), vehicle));
@@ -59,10 +63,14 @@ class VehicleServiceTest {
         assertThat(exception).isInstanceOf(ElementConflictException.class);
     }
 
-    private Vehicle getVehicleObject(){
-        Vehicle vehicle = new Vehicle();
-        vehicle.setName("");
-        vehicle.setRegNo("");
+    private VehicleRequestDTO getVehicleDTO(){
+        VehicleRequestDTO vehicle = VehicleRequestDTO.builder()
+                .name("")
+                .type(VehicleType.MIXER)
+                .regNo("")
+                .capacity(9.0)
+                .pumpLength(24)
+                .build();
         return vehicle;
     }
 }

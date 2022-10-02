@@ -13,7 +13,7 @@ betoniarni. Ponadto, generuje odpowiednie dokumenty WZ
 przez odbiorców zamówienia.
 
 
-####OPIS UŻYTKOWANIA
+#### OPIS UŻYTKOWANIA
 
 Założeniem aplikacji jest rejestrowanie zamówień przyjmowanych
 od wcześniej zdefiniowanych klientów, a następnie dysponowanie 
@@ -51,7 +51,7 @@ Moreover, it generates relevant DN documents
 (Delivery Note) to be presented and signed
 by the recipients of the order.
 
-### DESCRIPTION OF USE
+#### DESCRIPTION OF USE
 
 The premise of the application is to register orders
 from predefined clients and then disposing single batches 
@@ -79,7 +79,7 @@ allows to archive the order.
 Archived orders allows only to read basic information
 about the order and the DN.
 
-###SCREENSHOTS
+### SCREENSHOTS
 
 ![CPM - screenshot](screenshots/create_client.PNG)
 ![CPM - screenshot](screenshots/create_vehicle.PNG)

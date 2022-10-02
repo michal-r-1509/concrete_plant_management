@@ -1,15 +1,17 @@
-package com.concrete.concrete_plant_management.vehicle;
+package com.concrete.concrete_plant_management.vehicle.controller;
 
+import com.concrete.concrete_plant_management.domain.Vehicle;
+import com.concrete.concrete_plant_management.vehicle.service.VehicleService;
+import com.concrete.concrete_plant_management.vehicle.dto.VehicleRequestDTO;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
 
-@Controller
+@RestController
 @RequestMapping("/vehicles")
 class VehicleController {
     private final VehicleService vehicleService;
@@ -19,13 +21,13 @@ class VehicleController {
     }
 
     @PostMapping
-    ResponseEntity<Vehicle> saveVehicle(@RequestBody @Valid Vehicle toSave) {
+    ResponseEntity<Vehicle> saveVehicle(@RequestBody @Valid VehicleRequestDTO toSave) {
         Vehicle result = vehicleService.saveVehicle(toSave);
         return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }
 
     @PutMapping("/{id}")
-    ResponseEntity<Vehicle> patchVehicle(@PathVariable int id, @RequestBody Vehicle toUpdate) {
+    ResponseEntity<Vehicle> patchVehicle(@PathVariable int id, @RequestBody VehicleRequestDTO toUpdate) {
         Vehicle result = vehicleService.updateVehicle(id, toUpdate);
         return ResponseEntity.ok(result);
     }
@@ -46,7 +48,7 @@ class VehicleController {
     }
 
     @DeleteMapping("/{id}")
-    ResponseEntity<Vehicle> deleteVehicle(@PathVariable int id) {
+    ResponseEntity<Void> deleteVehicle(@PathVariable int id) {
         vehicleService.deleteVehicle(id);
         return ResponseEntity.noContent().build();
     }

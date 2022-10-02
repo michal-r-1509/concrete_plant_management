@@ -1,7 +1,5 @@
-package com.concrete.concrete_plant_management;
+package com.concrete.concrete_plant_management.exceptions;
 
-import com.concrete.concrete_plant_management.exceptions.ElementConflictException;
-import com.concrete.concrete_plant_management.exceptions.ElementNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -14,12 +12,18 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(ElementNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public String elementNotFoundHandler(ElementNotFoundException ex){
-        return ex.getMessage() + " with id " + ex.getId() + " not found";
+        return String.format("%s with id %d not found", ex.getMessage(), ex.getId());
     }
 
     @ExceptionHandler(ElementConflictException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
     public String elementConflict(ElementConflictException ex){
         return ex.getMessage() + " already exists";
+    }
+
+    @ExceptionHandler(VehicleByRegNoExistsException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public String vehicleByRegNoConflict(VehicleByRegNoExistsException ex){
+        return String.format("vehicle with registry number %s already exists", ex.getMessage());
     }
 }

@@ -1,7 +1,7 @@
 package com.concrete.concrete_plant_management.order_batch;
 
 import com.concrete.concrete_plant_management.order.Order;
-import com.concrete.concrete_plant_management.vehicle.Vehicle;
+import com.concrete.concrete_plant_management.domain.Vehicle;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;

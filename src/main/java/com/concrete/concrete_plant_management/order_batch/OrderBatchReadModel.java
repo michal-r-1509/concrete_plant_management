@@ -40,7 +40,7 @@ class OrderBatchReadModel {
                 orderBatch.getOrder().getClient().getCity() + ", NIP: " + nip;
         this.vehicle_name = orderBatch.getVehicle().getName();
         this.vehicle_reg = orderBatch.getVehicle().getRegNo();
-        this.vehicle_type = orderBatch.getVehicle().getType();
+        this.vehicle_type = orderBatch.getVehicle().getType().getValue();
         this.c_class = orderBatch.getOrder().getConcreteClass();
         this.amount = orderBatch.getAmount();
     }
