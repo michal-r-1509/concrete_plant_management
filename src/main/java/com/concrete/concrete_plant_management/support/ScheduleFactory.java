@@ -20,8 +20,8 @@ public class ScheduleFactory {
                 .build());
         schedules.add(VehicleSchedule.builder()
                 .date(LocalDate.of(2022, 11, 11))
-                .startTime(LocalTime.of(10, 40, 00))
-                .endTime(LocalTime.of(11, 40, 00))
+                .startTime(LocalTime.of(11, 40, 00))
+                .endTime(LocalTime.of(12, 40, 00))
                 .build());
         schedules.add(VehicleSchedule.builder()
                 .date(LocalDate.of(2022, 10, 10))
@@ -30,8 +30,8 @@ public class ScheduleFactory {
                 .build());
         schedules.add(VehicleSchedule.builder()
                 .date(LocalDate.of(2022, 10, 10))
-                .startTime(LocalTime.of(10, 40, 00))
-                .endTime(LocalTime.of(11, 40, 00))
+                .startTime(LocalTime.of(11, 40, 00))
+                .endTime(LocalTime.of(12, 40, 00))
                 .build());
         schedules.add(VehicleSchedule.builder()
                 .date(LocalDate.of(2022, 9, 9))
@@ -40,8 +40,8 @@ public class ScheduleFactory {
                 .build());
         schedules.add(VehicleSchedule.builder()
                 .date(LocalDate.of(2022, 9, 9))
-                .startTime(LocalTime.of(10, 40, 00))
-                .endTime(LocalTime.of(11, 40, 00))
+                .startTime(LocalTime.of(11, 40, 00))
+                .endTime(LocalTime.of(12, 40, 00))
                 .build());
     }
 }

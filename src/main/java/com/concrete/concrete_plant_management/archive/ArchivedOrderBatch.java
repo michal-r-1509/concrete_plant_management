@@ -20,7 +20,7 @@ class ArchivedOrderBatch {
     @Id
     @GeneratedValue(generator = "inc")
     @GenericGenerator(name = "inc", strategy = "increment")
-    private int id;
+    private Long id;
     private String dnNo;
     private LocalDate date;
     private LocalTime time;

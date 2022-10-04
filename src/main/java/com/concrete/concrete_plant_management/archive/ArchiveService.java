@@ -25,7 +25,7 @@ class ArchiveService {
         this.orderBatchService = orderBatchService;
     }
 
-    public void saveToArchive(final int orderId) {
+    public void saveToArchive(final Long orderId) {
         orderBatchService.readAllOrderBatchesByOrderId(orderId).stream()
                 .map(this::toArchive)
                 .forEach(repository::save);
@@ -33,7 +33,7 @@ class ArchiveService {
 
     private ArchivedOrderBatch toArchive(final OrderBatch orderBatch) {
         DnParser dnId = new DnParser(orderBatch.getId());
-        NipParser nip = new NipParser(orderBatch.getOrder().getClient().getNip());
+        NipParser nip = new NipParser(orderBatch.getOrder().getClient().getTaxpayerIdentNo());
         VehicleTypeParser vehicleTypeParser = new VehicleTypeParser();
         String dnNo = dnId.toString();
         LocalDate date = orderBatch.getOrder().getDate();

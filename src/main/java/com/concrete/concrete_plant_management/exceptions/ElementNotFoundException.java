@@ -1,13 +1,13 @@
 package com.concrete.concrete_plant_management.exceptions;
 
 public class ElementNotFoundException extends RuntimeException{
-    private final int id;
-    public ElementNotFoundException(final String message, final int id) {
+    private final Long id;
+    public ElementNotFoundException(final String message, final Long id) {
         super(message);
         this.id = id;
     }
 
-    public int getId() {
+    public Long getId() {
         return id;
     }
 }

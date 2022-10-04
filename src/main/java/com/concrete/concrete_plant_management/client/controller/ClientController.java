@@ -1,5 +1,7 @@
-package com.concrete.concrete_plant_management.client;
+package com.concrete.concrete_plant_management.client.controller;
 
+import com.concrete.concrete_plant_management.client.service.ClientService;
+import com.concrete.concrete_plant_management.domain.Client;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,7 +12,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/clients")
-class ClientController {
+public class ClientController {
 
     private final ClientService clientService;
 
@@ -25,13 +27,13 @@ class ClientController {
     }
 
     @PutMapping(value = "/{id}")
-    ResponseEntity<Client> patchClient(@PathVariable int id, @RequestBody Client toUpdate) {
+    ResponseEntity<Client> patchClient(@PathVariable Long id, @RequestBody Client toUpdate) {
         Client result = clientService.updateClient(id, toUpdate);
         return ResponseEntity.ok().body(result);
     }
 
     @GetMapping(value = "/{id}")
-    ResponseEntity<Client> readClient(@PathVariable int id) {
+    ResponseEntity<Client> readClient(@PathVariable Long id) {
         return ResponseEntity.ok(clientService.getClient(id));
     }
 
@@ -46,7 +48,7 @@ class ClientController {
     }
 
     @DeleteMapping(value = "/{id}")
-    ResponseEntity<Client> deleteClient(@PathVariable int id) {
+    ResponseEntity<Client> deleteClient(@PathVariable Long id) {
         clientService.deleteClient(id);
         return ResponseEntity.noContent().build();
     }

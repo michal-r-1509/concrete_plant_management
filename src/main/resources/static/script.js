@@ -460,11 +460,17 @@ function orderFormReader() {
     let pump = document.querySelector('#if_pump');
     let description = document.querySelector('#description');
 
-    return JSON.stringify({
+/*    return JSON.stringify({
         "id": orderAddModalActive ? "" : actualId, "date": date.value, "time": time.value,
         "concreteClass": concreteClass.value, "siteAddress": address.value, "pump": pump.checked,
         "description": description.value, "amount": amount.value,
         "client": {"id": definedClient.value, "name": definedClient.options[definedClient.selectedIndex].text}
+    });*/
+
+    return JSON.stringify({
+        "date": date.value, "time": time.value, "amount": amount.value, "concreteClass": concreteClass.value,
+        "siteAddress": address.value, "description": description.value, "pump": pump.checked,
+        "clientId": definedClient.value
     });
 }
 
@@ -488,11 +494,11 @@ function createOrder(order) {
     table.appendChild(tableRow);
 }
 
-function orderTableRowCreating({id, date, time, amount, siteAddress, done, pump, client}) {
+function orderTableRowCreating({id, date, time, amount, siteAddress, done, pump, clientName}) {
     let buttonText = done ? "archiwizuj" : "usuń";
     let buttonId = done ? "arc" : "del";
     return `<td><input id="or_sts_${id}" type="checkbox" disabled ${done ? 'checked' : ''}/></td>
-                            <td>${client.name}${siteAddress === "" ? "" : ", " + siteAddress}</td>
+                            <td>${clientName}${siteAddress === "" ? "" : ", " + siteAddress}</td>
                             <td>${id}</td>
                             <td>${date}</td>
                             <td>${time.toString().substring(0, 5)}</td>
@@ -756,7 +762,7 @@ function clientFormReader() {
 
     return JSON.stringify({
         "id": clientAddModalActive ? "" : actualId, "name": client_name.value,
-        "streetAndNo": street.value, "postCode": post_code.value, "city": city.value, "nip": nip.value
+        "streetAndNo": street.value, "postCode": post_code.value, "city": city.value, "taxpayerIdentNo": nip.value
     });
 }
 
@@ -807,15 +813,15 @@ function patchClientRow(client) {
     tableRow.innerHTML = clientTableRowCreating(client);
 }
 
-function clientTableRowCreating({id, name, streetAndNo, postCode, city, nip}) {
+function clientTableRowCreating({id, name, streetAndNo, postCode, city, taxpayerIdentNo}) {
+    let tpi = taxpayerIdentNo === 0 ? "-" : taxpayerIdentNo.toString().substring(0, 3) +
+    "-" + taxpayerIdentNo.toString().substring(3, 6) +
+    "-" +  taxpayerIdentNo.toString().substring(6, 8)+
+        "-" + taxpayerIdentNo.toString().substring(8);
     return `
                             <td>${name}</td>
                             <td>${streetAndNo}, ${postCode} ${city}</td>
-                            <td>${nip.toString()
-        .substring(0, 3)}-${nip.toString()
-        .substring(3, 6)}-${nip.toString()
-        .substring(6, 8)}-${nip.toString()
-        .substring(8)}</td>
+                            <td>${tpi}</td>
                             <td><button id="cl_edt_${id}">Edytuj</button></td>
                             <td><button id="cl_del_${id}">Usuń</button></td>`;
 }
@@ -1095,8 +1101,8 @@ function createSortOptionsList(tableName) {
         case clientsTableName: {
             return `<option value="name,asc">nazwa rosnąco</option>
                         <option value="name,desc">nazwa malejąco</option>
-                        <option value="nip,asc">NIP rosnąco</option>
-                        <option value="nip,desc">NIP malejąco</option>`
+                        <option value="taxpayerIdentNo,asc">NIP rosnąco</option>
+                        <option value="taxpayerIdentNo,desc">NIP malejąco</option>`
         }
         case vehiclesTableName: {
             return `<option value="name,asc">nazwa rosnąco</option>

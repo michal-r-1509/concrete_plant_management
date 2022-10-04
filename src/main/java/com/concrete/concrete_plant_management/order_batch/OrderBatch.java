@@ -1,6 +1,6 @@
 package com.concrete.concrete_plant_management.order_batch;
 
-import com.concrete.concrete_plant_management.order.Order;
+import com.concrete.concrete_plant_management.domain.Order;
 import com.concrete.concrete_plant_management.domain.Vehicle;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -22,7 +22,7 @@ public class OrderBatch {
     @Id
     @GeneratedValue(generator = "inc")
     @GenericGenerator(name = "inc", strategy = "increment")
-    private int id;
+    private Long id;
     @Min(0L)
     private double amount;
     @NotNull(message = "time cannot be null")

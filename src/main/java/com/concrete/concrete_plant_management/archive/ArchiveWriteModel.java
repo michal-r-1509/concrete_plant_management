@@ -4,5 +4,5 @@ import lombok.Getter;
 
 @Getter
 class ArchiveWriteModel {
-    private int orderId;
+    private Long orderId;
 }

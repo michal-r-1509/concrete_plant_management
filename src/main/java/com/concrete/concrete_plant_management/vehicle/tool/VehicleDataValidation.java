@@ -5,8 +5,6 @@ import com.concrete.concrete_plant_management.vehicle.dto.VehicleRequestDTO;
 
 public class VehicleDataValidation {
 
-    private Vehicle toValidate;
-
     public Vehicle vehicleValidation(VehicleRequestDTO toValidate){
         return Vehicle.builder()
                 .name(toValidate.getName() == null ? "" : toValidate.getName().trim())

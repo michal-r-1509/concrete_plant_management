@@ -15,8 +15,7 @@ import org.mockito.MockitoAnnotations;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.catchThrowable;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 
 class VehicleServiceImplTest {
@@ -47,19 +46,19 @@ class VehicleServiceImplTest {
     @DisplayName("throws ElementNotFoundException when vehicle not exists")
     void updateVehicle_throwsElementNotFoundException(){
         VehicleRequestDTO vehicle = getVehicleDTO();
-        when(repository.existsById(anyInt())).thenReturn(false);
+        when(repository.existsById(anyLong())).thenReturn(false);
 
-        var exception = catchThrowable(() -> service.updateVehicle(anyInt(), vehicle));
+        var exception = catchThrowable(() -> service.updateVehicle(anyLong(), vehicle));
         assertThat(exception).isInstanceOf(ElementNotFoundException.class);
     }
 
     @Test
     @DisplayName("throws ElementConflictException when vehicle exists and is used in any orderBatch")
     void deleteVehicle_throwsElementConflictException() {
-        when(repository.existsById(anyInt())).thenReturn(true);
-        when(orderBatchService.existsOrderBatchByVehicleId(anyInt())).thenReturn(true);
+        when(repository.existsById(anyLong())).thenReturn(true);
+        when(orderBatchService.existsOrderBatchByVehicleId(anyLong())).thenReturn(true);
 
-        var exception = catchThrowable(() -> service.deleteVehicle(anyInt()));
+        var exception = catchThrowable(() -> service.deleteVehicle(anyLong()));
         assertThat(exception).isInstanceOf(ElementConflictException.class);
     }
 

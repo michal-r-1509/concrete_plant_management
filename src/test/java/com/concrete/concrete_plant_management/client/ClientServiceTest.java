@@ -1,5 +1,9 @@
 package com.concrete.concrete_plant_management.client;
 
+import com.concrete.concrete_plant_management.client.repository.ClientRepositoryMethods;
+import com.concrete.concrete_plant_management.client.service.ClientService;
+import com.concrete.concrete_plant_management.client.service.ClientServiceImpl;
+import com.concrete.concrete_plant_management.domain.Client;
 import com.concrete.concrete_plant_management.exceptions.ElementConflictException;
 import com.concrete.concrete_plant_management.exceptions.ElementNotFoundException;
 import com.concrete.concrete_plant_management.order.OrderGlobalDao;
@@ -11,14 +15,13 @@ import org.mockito.MockitoAnnotations;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.catchThrowable;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 
 class ClientServiceTest {
 
     @Mock
-    private ClientCustomMethods repository;
+    private ClientRepositoryMethods repository;
     @Mock
     private OrderGlobalDao orderGlobalDao;
     private ClientService service;
@@ -26,13 +29,13 @@ class ClientServiceTest {
     @BeforeEach
     public void setup() {
         MockitoAnnotations.openMocks(this);
-        service = new ClientService(repository, orderGlobalDao);
+        service = new ClientServiceImpl(repository, orderGlobalDao);
     }
 
     @Test
     @DisplayName("throws ElementConflictException when client by nip number exists")
     void saveClient_throwsElementConflictException() {
-        when(repository.existsClientByNip(anyLong())).thenReturn(true);
+        when(repository.existsClientByTaxpayerIdentNo(anyLong())).thenReturn(true);
         var exception = catchThrowable(() -> service.saveClient(getClient()));
         assertThat(exception).isInstanceOf(ElementConflictException.class);
     }
@@ -40,17 +43,17 @@ class ClientServiceTest {
     @Test
     @DisplayName("throws ElementNotFoundException when client not exists")
     void updateClient_throwsElementNotFoundException() {
-        when(repository.existsById(anyInt())).thenReturn(false);
-        var exception = catchThrowable(() -> service.updateClient(anyInt(), getClient()));
+        when(repository.existsById(anyLong())).thenReturn(false);
+        var exception = catchThrowable(() -> service.updateClient(anyLong(), getClient()));
         assertThat(exception).isInstanceOf(ElementNotFoundException.class);
     }
 
     @Test
     @DisplayName("throws ElementConflictException when client exists in active order")
     void deleteClient_throwsElementConflictException() {
-        when(repository.existsById(anyInt())).thenReturn(true);
-        when(orderGlobalDao.existsOrderByClientId(anyInt())).thenReturn(true);
-        var exception = catchThrowable(() -> service.deleteClient(anyInt()));
+        when(repository.existsById(anyLong())).thenReturn(true);
+        when(orderGlobalDao.existsOrderByClientId(anyLong())).thenReturn(true);
+        var exception = catchThrowable(() -> service.deleteClient(anyLong()));
         assertThat(exception).isInstanceOf(ElementConflictException.class);
     }
 

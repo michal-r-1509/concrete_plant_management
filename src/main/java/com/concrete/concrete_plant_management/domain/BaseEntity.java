@@ -17,5 +17,5 @@ public abstract class BaseEntity {
     @GeneratedValue(generator = "inc")
     @GenericGenerator(name = "inc", strategy = "increment")
     @Column(unique = true, nullable = false)
-    private int id;
+    private Long id;
 }

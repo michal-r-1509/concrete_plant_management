@@ -27,13 +27,13 @@ class VehicleController {
     }
 
     @PutMapping("/{id}")
-    ResponseEntity<Vehicle> patchVehicle(@PathVariable int id, @RequestBody VehicleRequestDTO toUpdate) {
+    ResponseEntity<Vehicle> patchVehicle(@PathVariable Long id, @RequestBody VehicleRequestDTO toUpdate) {
         Vehicle result = vehicleService.updateVehicle(id, toUpdate);
         return ResponseEntity.ok(result);
     }
 
     @GetMapping("/{id}")
-    ResponseEntity<Vehicle> readVehicle(@PathVariable int id) {
+    ResponseEntity<Vehicle> readVehicle(@PathVariable Long id) {
         return ResponseEntity.ok(vehicleService.readVehicle(id));
     }
 
@@ -48,7 +48,7 @@ class VehicleController {
     }
 
     @DeleteMapping("/{id}")
-    ResponseEntity<Void> deleteVehicle(@PathVariable int id) {
+    ResponseEntity<Void> deleteVehicle(@PathVariable Long id) {
         vehicleService.deleteVehicle(id);
         return ResponseEntity.noContent().build();
     }

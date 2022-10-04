@@ -1,6 +1,6 @@
-package com.concrete.concrete_plant_management;
+package com.concrete.concrete_plant_management.client.tool;
 
-public record PostCode(String postCode) {
+public record PostCodeParser(String postCode) {
 
     @Override
     public String toString() {

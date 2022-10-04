@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
+import javax.validation.constraints.DecimalMax;
+import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 
@@ -19,8 +21,12 @@ public class VehicleRequestDTO {
     private String name;
     private VehicleType type;
     @NotBlank
-    @Size(min = 6, max = 8)
+    @Size(min = 2, max = 10)
     private String regNo;
+    @DecimalMin("0.0")
+    @DecimalMax("30.0")
     private double capacity;
+    @DecimalMin("0.0")
+    @DecimalMax("100.0")
     private double pumpLength;
 }

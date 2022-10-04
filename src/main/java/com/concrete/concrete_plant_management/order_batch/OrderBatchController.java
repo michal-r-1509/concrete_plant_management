@@ -33,14 +33,14 @@ class OrderBatchController {
 
     @Transactional
     @PatchMapping("/{id}")
-    ResponseEntity<?> inverseOrderBatchStatus(@PathVariable int id){
+    ResponseEntity<?> inverseOrderBatchStatus(@PathVariable Long id){
         OrderStatus orderStatus = orderBatchService.inverseStatus(id);
         publisher.publishEvent(orderStatus);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
     @GetMapping("/{id}")
-    ResponseEntity <OrderBatchReadModel> readOrderBatch(@PathVariable int id){
+    ResponseEntity <OrderBatchReadModel> readOrderBatch(@PathVariable Long id){
         OrderBatchReadModel orderBatch = orderBatchService.readOrderBatch(id);
         if (orderBatch == null) {
             return ResponseEntity.notFound().build();
@@ -60,13 +60,13 @@ class OrderBatchController {
     }
 
     @GetMapping("/search/{order_id}")
-    ResponseEntity <List<OrderBatch>> readAllOrderBatchesByOrderId(@PathVariable int order_id){
+    ResponseEntity <List<OrderBatch>> readAllOrderBatchesByOrderId(@PathVariable Long order_id){
         List<OrderBatch> resultList = orderBatchService.readAllOrderBatchesByOrderId(order_id);
         return ResponseEntity.ok(resultList);
     }
 
     @DeleteMapping("/{id}")
-    ResponseEntity<Vehicle> deleteVehicle(@PathVariable int id) {
+    ResponseEntity<Vehicle> deleteVehicle(@PathVariable Long id) {
         orderBatchService.deleteOrderBatch(id);
         return ResponseEntity.noContent().build();
     }

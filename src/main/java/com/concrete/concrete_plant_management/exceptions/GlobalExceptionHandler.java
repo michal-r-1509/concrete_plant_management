@@ -18,12 +18,12 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(ElementConflictException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
     public String elementConflict(ElementConflictException ex){
-        return ex.getMessage() + " already exists";
+        return ex.getMessage();
     }
 
-    @ExceptionHandler(VehicleByRegNoExistsException.class)
-    @ResponseStatus(HttpStatus.CONFLICT)
-    public String vehicleByRegNoConflict(VehicleByRegNoExistsException ex){
-        return String.format("vehicle with registry number %s already exists", ex.getMessage());
+    @ExceptionHandler(TaxpayerIdentityNumberException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public String invalidTaxpayerIdentityNumber(TaxpayerIdentityNumberException ex){
+        return ex.getMessage();
     }
 }

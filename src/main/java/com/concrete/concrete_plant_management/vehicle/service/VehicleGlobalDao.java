@@ -13,7 +13,7 @@ public class VehicleGlobalDao {
         this.repository = repository;
     }
 
-    public Vehicle getVehicle(int id){
+    public Vehicle getVehicle(Long id){
         return repository.findById(id).orElseThrow(() -> new ElementNotFoundException("vehicle", id));
     }
 }

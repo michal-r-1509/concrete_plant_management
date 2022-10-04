@@ -28,7 +28,7 @@ class OrderBatchReadModel {
     private final DnParser dnId;
 
     public OrderBatchReadModel(final OrderBatch orderBatch) {
-        nip = new NipParser(orderBatch.getOrder().getClient().getNip());
+        nip = new NipParser(orderBatch.getOrder().getClient().getTaxpayerIdentNo());
         dnId = new DnParser(orderBatch.getId());
         this.dn_no = dnId.toString();
         this.date = orderBatch.getOrder().getDate();

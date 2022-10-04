@@ -7,14 +7,14 @@ import lombok.Getter;
 public class OrderStatus {
 
     private final boolean status;
-    private final int orderId;
+    private final Long orderId;
 
-    public OrderStatus(final boolean status, final int orderId) {
+    public OrderStatus(final boolean status, final Long orderId) {
         this.status = status;
         this.orderId = orderId;
     }
 
-    public static OrderStatus changingOrderStatus(final boolean status, final int orderId){
+    public static OrderStatus changingOrderStatus(final boolean status, final Long orderId){
         return new OrderStatus(status, orderId);
     }
 }

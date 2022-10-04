@@ -1,7 +1,7 @@
 package com.concrete.concrete_plant_management.order_batch;
 
 import com.concrete.concrete_plant_management.exceptions.ElementNotFoundException;
-import com.concrete.concrete_plant_management.order.Order;
+import com.concrete.concrete_plant_management.domain.Order;
 import com.concrete.concrete_plant_management.order.event.OrderStatus;
 import com.concrete.concrete_plant_management.domain.Vehicle;
 import com.concrete.concrete_plant_management.vehicle.service.VehicleGlobalDao;
@@ -57,7 +57,7 @@ public class OrderBatchService {
                 .collect(Collectors.toList());
     }
 
-    public List<OrderBatch> readAllOrderBatchesByOrderId(final int order_id) {
+    public List<OrderBatch> readAllOrderBatchesByOrderId(final Long order_id) {
         return repository.findAll().stream()
                 .filter(orderBatch -> orderBatch.getOrder().getId() == order_id)
                 .sorted(Comparator.comparing(OrderBatch::getTime))
@@ -68,7 +68,7 @@ public class OrderBatchService {
         return repository.findAll(sort);
     }
 
-    public OrderBatchReadModel readOrderBatch(final int id) {
+    public OrderBatchReadModel readOrderBatch(final Long id) {
         return new OrderBatchReadModel(repository.findById(id)
                 .orElseThrow(() -> new ElementNotFoundException("orderBatch", id)));
     }
@@ -78,7 +78,7 @@ public class OrderBatchService {
                 .forEach(orderBatch -> orderBatch.setOrder(order));
     }
 
-    public void deleteOrderBatch(final int id) {
+    public void deleteOrderBatch(final Long id) {
         if (repository.existsById(id)) {
             repository.deleteById(id);
         } else {
@@ -86,13 +86,13 @@ public class OrderBatchService {
         }
     }
 
-    public OrderStatus inverseStatus(final int id) {
+    public OrderStatus inverseStatus(final Long id) {
         OrderBatch orderBatch = repository.findById(id)
                 .orElseThrow(() -> new ElementNotFoundException("orderBatch", id));
         orderBatch.setDone(!orderBatch.isDone());
         repository.save(orderBatch);
 
-        int orderId = orderBatch.getOrder().getId();
+        Long orderId = orderBatch.getOrder().getId();
         double orderAmount = orderBatch.getOrder().getAmount();
 
         boolean allBatchesStatus = repository.findAllOrderBatchesByOrder_Id(orderBatch.getOrder().getId()).stream()
@@ -102,7 +102,7 @@ public class OrderBatchService {
         return OrderStatus.changingOrderStatus(allBatchesStatus && orderAmount == allBatchesAmount, orderId);
     }
 
-    public boolean existsOrderBatchByVehicleId(final int id) {
+    public boolean existsOrderBatchByVehicleId(final Long id) {
         return repository.existsOrderBatchByVehicle_Id(id);
     }
 }

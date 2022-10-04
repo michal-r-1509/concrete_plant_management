@@ -11,6 +11,7 @@ import org.mockito.MockitoAnnotations;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.catchThrowable;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 
 class OrderBatchServiceTest {
@@ -29,8 +30,8 @@ class OrderBatchServiceTest {
     @Test
     @DisplayName("throws ElementNotFoundException when orderBatch not exist")
     void readOrderBatch_throwsElementNotFoundException(){
-        when(repository.existsById(anyInt())).thenReturn(false);
-        var exception = catchThrowable(()-> service.readOrderBatch(anyInt()));
+        when(repository.existsById(anyLong())).thenReturn(false);
+        var exception = catchThrowable(()-> service.readOrderBatch(anyLong()));
         assertThat(exception).isInstanceOf(ElementNotFoundException.class);
     }
 

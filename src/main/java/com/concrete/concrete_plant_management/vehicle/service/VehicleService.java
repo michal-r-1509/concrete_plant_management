@@ -8,10 +8,9 @@ import java.util.List;
 
 public interface VehicleService {
     Vehicle saveVehicle(final VehicleRequestDTO toSave);
-    Vehicle updateVehicle(final int id, final VehicleRequestDTO toUpdate);
-    Vehicle readVehicle(final int id);
+    Vehicle updateVehicle(final Long id, final VehicleRequestDTO toUpdate);
+    Vehicle readVehicle(final Long id);
     List<Vehicle> readAllVehicles();
     List<Vehicle> readAllVehicles(final Sort sort);
-    void deleteVehicle(final int id);
-    long countVehicles();
+    void deleteVehicle(final Long id);
 }

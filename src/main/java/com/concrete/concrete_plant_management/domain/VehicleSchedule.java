@@ -20,6 +20,6 @@ public class VehicleSchedule extends BaseEntity{
     private LocalTime startTime;
     private LocalTime endTime;
     @ManyToOne(cascade = {CascadeType.REFRESH})
-    @JoinColumn(name = "vehicle_id")
+    @JoinColumn(name = "vehicle_id", referencedColumnName = "id")
     private Vehicle vehicle;
 }

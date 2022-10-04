@@ -3,17 +3,18 @@ package com.concrete.concrete_plant_management.vehicle.service;
 import com.concrete.concrete_plant_management.domain.Vehicle;
 import com.concrete.concrete_plant_management.exceptions.ElementConflictException;
 import com.concrete.concrete_plant_management.exceptions.ElementNotFoundException;
-import com.concrete.concrete_plant_management.exceptions.VehicleByRegNoExistsException;
 import com.concrete.concrete_plant_management.order_batch.OrderBatchService;
-import com.concrete.concrete_plant_management.vehicle.tool.VehicleDataValidation;
-import com.concrete.concrete_plant_management.vehicle.repository.VehicleRepositoryMethods;
 import com.concrete.concrete_plant_management.vehicle.dto.VehicleRequestDTO;
+import com.concrete.concrete_plant_management.vehicle.repository.VehicleRepositoryMethods;
+import com.concrete.concrete_plant_management.vehicle.tool.VehicleDataValidation;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+@Slf4j
 @Transactional
 @Service
 public class VehicleServiceImpl implements VehicleService{
@@ -29,24 +30,29 @@ public class VehicleServiceImpl implements VehicleService{
 
     @Override
     public Vehicle saveVehicle(final VehicleRequestDTO toSave) {
-        if (repository.existsByRegNo(toSave.getRegNo())) {
-            throw new VehicleByRegNoExistsException(toSave.getRegNo());
-        }
         Vehicle vehicle = new VehicleDataValidation().vehicleValidation(toSave);
+        if (repository.existsByRegNo(vehicle.getRegNo())) {
+            throw new ElementConflictException("vehicle", "registry number", vehicle.getRegNo());
+        }
+        log.info("created vehicle with registry number: {}", vehicle.getRegNo());
         return repository.save(vehicle);
     }
 
     @Override
-    public Vehicle updateVehicle(final int id, final VehicleRequestDTO toUpdate) {
-        if (repository.existsById(id)) {
-            Vehicle vehicle = new VehicleDataValidation().vehicleValidation(toUpdate);
-            return repository.save(vehicle);
+    public Vehicle updateVehicle(final Long id, final VehicleRequestDTO toUpdate) {
+        Vehicle vehicle = new VehicleDataValidation().vehicleValidation(toUpdate);
+        if (!repository.existsById(id)) {
+            throw new ElementNotFoundException("vehicle", id);
         }
-        throw new ElementNotFoundException("vehicle", id);
+        if (repository.existsByRegNo(vehicle.getRegNo())) {
+            throw new ElementConflictException("vehicle", "registry number", vehicle.getRegNo());
+        }
+        log.info("updated vehicle with id: {}", id);
+        return repository.save(vehicle);
     }
 
     @Override
-    public Vehicle readVehicle(final int id) {
+    public Vehicle readVehicle(final Long id) {
         return repository.findById(id).orElseThrow(() -> new ElementNotFoundException("vehicle", id));
     }
 
@@ -61,20 +67,16 @@ public class VehicleServiceImpl implements VehicleService{
     }
 
     @Override
-    public void deleteVehicle(final int id) {
+    public void deleteVehicle(final Long id) {
         if (repository.existsById(id)){
             if (orderBatchService.existsOrderBatchByVehicleId(id)){
                 throw new ElementConflictException("vehicle in orderBatch");
             }else{
                 repository.deleteById(id);
+                log.info("vehicle with id: {} deleted", id);
             }
         }else{
             throw new ElementNotFoundException("vehicle", id);
         }
     }
-    @Override
-    public long countVehicles(){
-        return repository.count();
-    }
-
 }

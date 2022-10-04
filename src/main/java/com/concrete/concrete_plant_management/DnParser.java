@@ -1,6 +1,6 @@
 package com.concrete.concrete_plant_management;
 
-public record DnParser(int id) {
+public record DnParser(Long id) {
 
     @Override
     public String toString() {
