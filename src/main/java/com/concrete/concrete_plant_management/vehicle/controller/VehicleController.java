@@ -3,6 +3,7 @@ package com.concrete.concrete_plant_management.vehicle.controller;
 import com.concrete.concrete_plant_management.domain.Vehicle;
 import com.concrete.concrete_plant_management.vehicle.service.VehicleService;
 import com.concrete.concrete_plant_management.vehicle.dto.VehicleRequestDTO;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,14 +12,11 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.util.List;
 
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/vehicles")
 class VehicleController {
     private final VehicleService vehicleService;
-
-    public VehicleController(final VehicleService vehicleService) {
-        this.vehicleService = vehicleService;
-    }
 
     @PostMapping
     ResponseEntity<Vehicle> saveVehicle(@RequestBody @Valid VehicleRequestDTO toSave) {

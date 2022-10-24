@@ -17,13 +17,19 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(ElementConflictException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
-    public String elementConflict(ElementConflictException ex){
+    public String elementConflictHandler(ElementConflictException ex){
         return ex.getMessage();
     }
 
     @ExceptionHandler(TaxpayerIdentityNumberException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public String invalidTaxpayerIdentityNumber(TaxpayerIdentityNumberException ex){
+    public String invalidTaxpayerIdentityNumberHandler(TaxpayerIdentityNumberException ex){
+        return ex.getMessage();
+    }
+
+    @ExceptionHandler(IllegalOperationException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public String orderUndoneHandler(IllegalOperationException ex){
         return ex.getMessage();
     }
 }

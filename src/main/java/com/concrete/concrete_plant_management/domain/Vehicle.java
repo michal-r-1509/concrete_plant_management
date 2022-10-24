@@ -24,8 +24,11 @@ public class Vehicle extends BaseEntity {
     private double capacity;
     private double pumpLength;
 
-    @JsonIgnore
-    @Transient
+    /*@JsonIgnore
     @OneToMany(mappedBy = "vehicle", cascade = {CascadeType.REMOVE, CascadeType.REFRESH}, orphanRemoval = true)
-    private List<VehicleSchedule> schedule = new ArrayList<>();
+    private List<VehicleSchedule> schedule = new ArrayList<>();*/
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "vehicle", cascade = {CascadeType.REMOVE, CascadeType.REFRESH}, orphanRemoval = true)
+    private List<Schedule> schedule = new ArrayList<>();
 }

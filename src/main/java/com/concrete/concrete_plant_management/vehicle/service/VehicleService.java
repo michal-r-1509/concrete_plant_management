@@ -13,4 +13,6 @@ public interface VehicleService {
     List<Vehicle> readAllVehicles();
     List<Vehicle> readAllVehicles(final Sort sort);
     void deleteVehicle(final Long id);
+    boolean existById(final Long id);
+//    void updateVehicleSchedule(final Long vehicleId, VehicleSchedule schedule);
 }

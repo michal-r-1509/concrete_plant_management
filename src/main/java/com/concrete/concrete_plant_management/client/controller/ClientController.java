@@ -2,6 +2,7 @@ package com.concrete.concrete_plant_management.client.controller;
 
 import com.concrete.concrete_plant_management.client.service.ClientService;
 import com.concrete.concrete_plant_management.domain.Client;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,15 +11,12 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.util.List;
 
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/clients")
 public class ClientController {
 
     private final ClientService clientService;
-
-    public ClientController(final ClientService clientService) {
-        this.clientService = clientService;
-    }
 
     @PostMapping
     ResponseEntity<Client> saveClient(@RequestBody @Valid Client toSave) {

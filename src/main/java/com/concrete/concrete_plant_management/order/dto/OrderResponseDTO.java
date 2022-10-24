@@ -13,8 +13,10 @@ public class OrderResponseDTO {
     private LocalDate date;
     private LocalTime time;
     private double amount;
+    private Long clientId;
     private String clientName;
     private String siteAddress;
+    private String description;
     private boolean pump;
     private boolean done;
 }

@@ -2,10 +2,11 @@ package com.concrete.concrete_plant_management.vehicle;
 
 import com.concrete.concrete_plant_management.exceptions.ElementConflictException;
 import com.concrete.concrete_plant_management.exceptions.ElementNotFoundException;
-import com.concrete.concrete_plant_management.order_batch.OrderBatchService;
+import com.concrete.concrete_plant_management.order.schedule.ScheduleRepository;
 import com.concrete.concrete_plant_management.vehicle.dto.VehicleRequestDTO;
 import com.concrete.concrete_plant_management.vehicle.repository.VehicleRepositoryMethods;
 import com.concrete.concrete_plant_management.vehicle.service.VehicleServiceImpl;
+import com.concrete.concrete_plant_management.vehicle.tool.VehicleMapper;
 import com.concrete.concrete_plant_management.vehicle.tool.VehicleType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -15,7 +16,8 @@ import org.mockito.MockitoAnnotations;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.catchThrowable;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 class VehicleServiceImplTest {
@@ -23,13 +25,14 @@ class VehicleServiceImplTest {
     @Mock
     private VehicleRepositoryMethods repository;
     @Mock
-    private OrderBatchService orderBatchService;
+    private VehicleMapper mapper;
     private VehicleServiceImpl service;
+    private ScheduleRepository scheduleRepository;
 
     @BeforeEach
     public void setup() {
         MockitoAnnotations.openMocks(this);
-        service = new VehicleServiceImpl(repository, orderBatchService);
+        service = new VehicleServiceImpl(repository, mapper, scheduleRepository);
     }
 
     @Test
@@ -56,7 +59,7 @@ class VehicleServiceImplTest {
     @DisplayName("throws ElementConflictException when vehicle exists and is used in any orderBatch")
     void deleteVehicle_throwsElementConflictException() {
         when(repository.existsById(anyLong())).thenReturn(true);
-        when(orderBatchService.existsOrderBatchByVehicleId(anyLong())).thenReturn(true);
+        when(scheduleRepository.existsScheduleByVehicleId(anyLong())).thenReturn(true);
 
         var exception = catchThrowable(() -> service.deleteVehicle(anyLong()));
         assertThat(exception).isInstanceOf(ElementConflictException.class);

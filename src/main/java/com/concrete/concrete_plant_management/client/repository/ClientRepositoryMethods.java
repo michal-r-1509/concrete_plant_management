@@ -15,4 +15,5 @@ public interface ClientRepositoryMethods {
     void deleteById(Long id);
     boolean existsClientByTaxpayerIdentNo(Long nip);
     boolean existsClientByName(String name);
+    boolean existsClientByNameAndIdIsNot(String name, Long id);
 }

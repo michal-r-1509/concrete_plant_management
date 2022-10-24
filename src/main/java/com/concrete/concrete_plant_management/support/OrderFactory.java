@@ -33,6 +33,15 @@ public class OrderFactory {
                 .pump(true)
                 .done(false)
                 .build());
+        orders.add(Order.builder()
+                .date(LocalDate.of(2022, 5, 15))
+                .time(LocalTime.of(18, 30))
+                .amount(10.0)
+                .concreteClass("C16/20")
+                .siteAddress("Lipna 22, Miechow")
+                .pump(false)
+                .done(false)
+                .build());
     }
 
 }

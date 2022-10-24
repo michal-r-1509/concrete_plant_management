@@ -35,13 +35,16 @@ document.getElementById('display_form').addEventListener('change', ev => {
 
 // ORDER BUTTONS AND VARIABLES
 const ordersUrl = '/orders';
+const batchesUrl = '/batches';
+const postToArchiveUrl = "/archive";
 const orderModal = document.getElementById('order_modal');
 const orders_button_tab = "orders_tab";
 let orderAddModalActive = false;
 const ordersTableName = "order_table";
 
 // MANAGEMENT BUTTONS AND VARIABLES
-const managementsUrl = '/order_batches';
+const managementsUrl = '/batches';
+const printUrl = '/print';
 const managementModal = document.getElementById('management_modal');
 const management_button_tab = "management_tab";
 document.getElementById('part_add').addEventListener('click', addPartButtonHandler);
@@ -148,7 +151,7 @@ async function tableButtonsHandler(element) {
         await deleteEntity(ordersUrl, id);
         tableRowDeleting('or_row_' + id);
     } else if (element.id.includes("or_arc")) {
-        await archiveOrder(archivesUrl, id);
+        await archiveOrder(ordersUrl, id);
         await deleteEntity(ordersUrl, id);
         tableRowDeleting('or_row_' + id);
     } else if (element.id.includes("mg_del")) {
@@ -460,13 +463,6 @@ function orderFormReader() {
     let pump = document.querySelector('#if_pump');
     let description = document.querySelector('#description');
 
-/*    return JSON.stringify({
-        "id": orderAddModalActive ? "" : actualId, "date": date.value, "time": time.value,
-        "concreteClass": concreteClass.value, "siteAddress": address.value, "pump": pump.checked,
-        "description": description.value, "amount": amount.value,
-        "client": {"id": definedClient.value, "name": definedClient.options[definedClient.selectedIndex].text}
-    });*/
-
     return JSON.stringify({
         "date": date.value, "time": time.value, "amount": amount.value, "concreteClass": concreteClass.value,
         "siteAddress": address.value, "description": description.value, "pump": pump.checked,
@@ -513,8 +509,8 @@ async function editOrderForm(id) {
     await orderModalFill(data);
 }
 
-async function orderModalFill({date, time, amount, concreteClass, siteAddress, pump, description, client}) {
-    document.querySelector('#client_selection').value = client.id;
+async function orderModalFill({date, time, amount, concreteClass, siteAddress, pump, description, clientId}) {
+    document.querySelector('#client_selection').value = clientId;
     document.querySelector('#date').value = date;
     document.querySelector('#time').value = time;
     document.querySelector('#address').value = siteAddress;
@@ -552,8 +548,9 @@ function patchOrderRow(order) {
     tableRow.innerHTML = orderTableRowCreating(order);
 }
 
-async function archiveOrder(archiveUrl, id){
-    await postToArchive(archiveUrl, JSON.stringify({"orderId": id}))
+async function archiveOrder(orderUrl, id){
+    // await postToArchive(archiveUrl, JSON.stringify({"orderId": id}));
+    await postToArchive(orderUrl, id + postToArchiveUrl);
 }
 
 // MANAGEMENTS
@@ -579,9 +576,9 @@ async function orderBatchLoading(id) {
     if (response !== null) {
         partId = 0;
         for (const resp of Object.values(response)) {
-            addPartToTemporaryBatchList(resp.id, resp.vehicle.id, resp.vehicle.type, resp.vehicle.regNo,
-                resp.vehicle.name, resp.amount, resp.time, false);
-            let vehicleTypeAndName = vehicleTypeParser(resp.vehicle.type) + " " + resp.vehicle.regNo + " " + resp.vehicle.name;
+            addPartToTemporaryBatchList(resp.id, resp.vehicleId, resp.vehicleType, resp.vehicleRegNo,
+                resp.vehicleName, resp.amount, resp.time, false);
+            let vehicleTypeAndName = vehicleTypeParser(resp.vehicleType) + " " + resp.vehicleRegNo + " " + resp.vehicleName;
             await createPart(vehicleTypeAndName, resp.amount, resp.time);
         }
     }
@@ -608,6 +605,7 @@ async function partFormReader() {
     let vehicle = document.querySelector('#vehicle_selection');
     let amount = document.querySelector('#part_amount').value;
     let time = document.querySelector('#part_time').value;
+    let duration = document.querySelector('#duration').value;
 
     amount = parseFloat(amount);
     amount = amount < 0 ? 0 : amount;
@@ -617,10 +615,10 @@ async function partFormReader() {
 
     let vehicleTextValue = vehicle.options[vehicle.selectedIndex].text;
     amount = (vehicleAmountSum + amount >= orderAmount) ? orderAmount - vehicleAmountSum : amount;
-    amount = vehicleTextValue.includes("Pompa") ? 0 : amount;
+    amount = vehicleTextValue.includes("pompa") ? 0 : amount;
 
     await addPartToTemporaryBatchList(0, vehicleEntity.id, vehicleEntity.type, vehicleEntity.regNo,
-        vehicleEntity.name, amount, time, false);
+        vehicleEntity.name, amount, time, parseInt(duration), false);
     createPart(vehicleTextValue, amount, time);
     footerDescriptionUpdate();
 }
@@ -644,16 +642,17 @@ function createPart(vehicleTypeAndName, amount, time) {
     table.appendChild(tableRow);
 }
 
-function addPartToTemporaryBatchList(orderBatchId, vehicleId, vehType, vehRegNo, vehName, amount, time, toDelete) {
+function addPartToTemporaryBatchList(id, vehicleId, vehType, vehRegNo, vehName, amount, time, duration, toDelete) {
     vehicleAmountSum += amount;
     let part = {
-        orderBatchId: orderBatchId,
+        id: id,
         vehicleId: vehicleId,
         vehicleType: vehType,
         vehicleRegNo: vehRegNo,
         vehicleName: vehName,
         amount: amount,
         time: time,
+        duration: duration,
         toDelete: toDelete
     };
     partId += 1;
@@ -697,9 +696,8 @@ function managementTableFormReader() {
     let data = [];
     for (const part of temporaryBatchList) {
         data.push(JSON.stringify({
-            "batchId": part.orderBatchId, "amount": part.amount, "time": part.time, "toDelete": part.toDelete,
-            "order": {"id": temporaryOrder.id},
-            "vehicle": {"id": part.vehicleId}
+            "id": part.id, "time": part.time, "amount": part.amount, "duration": part.duration,
+            "vehicleId": part.vehicleId, "toDelete": part.toDelete
         }));
     }
     return "[" + data + "]";
@@ -708,38 +706,38 @@ function managementTableFormReader() {
 async function addingPlanHandler() {
     const data = managementTableFormReader();
     if (data !== "[]") {
-        await postToServer(managementsUrl, data);
+        await updateServerEntity(ordersUrl, actualId + batchesUrl, data);
     }
     await closingModal();
 }
 
-async function createPlan(planTable) {
+async function createPlan(responseTable) {
     const table = document.getElementById(managementsTableName);
     if (table === null) {
         await tableCreating(managementsTableName);
     }
-    for (const row of Object.values(planTable)) {
+    for (const response of Object.values(responseTable)) {
         const tableRow = document.createElement('tr');
-        tableRow.setAttribute('id', "mg_row_" + row.id);
-        tableRow.innerHTML = await managementTableRowCreating(row);
+        tableRow.setAttribute('id', "mg_row_" + response.id);
+        tableRow.innerHTML = await managementTableRowCreating(response);
         table.appendChild(tableRow);
     }
 }
 
-async function managementTableRowCreating({id, amount, time, done, order, vehicle}) {
-    return `<td><input id="pt_sts_${id}" type="checkbox" ${done ? 'checked' : ''}/></td>
-            <td id="mg__td_${id}">${order.id}</td>
-            <td>${vehicleTypeParser(vehicle.type)}, ${vehicle.regNo}, ${vehicle.name}</td>
-            <td>${order.client.name}</td>
-            <td>${order.siteAddress}</td>
-            <td>${amount !== 0.0 ? amount : "-"}${vehicle.type === 3 ? "/P" : ""}</td>
-            <td>${order.date}, ${time.toString().substring(0, 5)}</td>
-            <td><button id="mg_del_${id}" ${done ? 'disabled' : ''}>Usuń</button></td>
-            <td><button id="mg_prt_${id}" ${done ? 'disabled' : ''}>WZ</button></td>`;
+async function managementTableRowCreating(response) {
+    return `<td><input id="pt_sts_${response.id}" type="checkbox" ${response.done ? 'checked' : ''}/></td>
+            <td id="mg__td_${response.id}">${response.orderId}</td>
+            <td>${vehicleTypeParser(response.vehicleType)}, ${response.vehicleRegNo}, ${response.vehicleName}</td>
+            <td>${response.clientName}</td>
+            <td>${response.siteAddress}</td>
+            <td>${response.amount !== 0.0 ? response.amount : "-"}${response.vehicleType === "PUMP" ? "/P" : ""}</td>
+            <td>${response.date}, ${response.time.toString().substring(0, 5)}</td>
+            <td><button id="mg_del_${response.id}" ${response.done ? 'disabled' : ''}>Usuń</button></td>
+            <td><button id="mg_prt_${response.id}" ${response.done ? 'disabled' : ''}>WZ</button></td>`;
 }
 
 async function printHandler(id){
-    let response = await getEntity(managementsUrl, id);
+    let response = await getEntity(managementsUrl, id + printUrl);
     await print(response);
 }
 
@@ -963,10 +961,10 @@ async function postToServer(url, data) {
         });
 }
 
-async function postToArchive(archiveUrl, data){
-    await fetch(archiveUrl, {
-        method: 'POST',
-        body: data,
+async function postToArchive(url, id){
+    await fetch(url + '/' + id, {
+        method: 'PATCH',
+        // body: data,
         headers: {'Content-Type': 'application/json'}
     });
 }
@@ -1131,24 +1129,25 @@ function sortOptionsRemoving() {
 
 // PRINTING
 
-function print({dn_no, date, time, site_address, client_and_address,
-                   vehicle_name, vehicle_reg, vehicle_type, amount, c_class}) {
+function print({dnNo, date, time, siteAddress, clientName, taxPayIdentNo,
+                   vehicleName, vehicleRegNo, vehicleType, amount, concreteClass}) {
     const dnTemplate = document.getElementById("dn_print");
     const iframeWindow = dnTemplate.contentWindow;
     const iframeDoc = dnTemplate.contentDocument;
 
-    iframeDoc.getElementById("dn_title").textContent = dn_no;
-    iframeDoc.getElementById("dn_no").textContent = dn_no;
+    iframeDoc.getElementById("dn_title").textContent = dnNo;
+    iframeDoc.getElementById("dn_no").textContent = dnNo;
     iframeDoc.getElementById("dn_date").textContent = date;
-    iframeDoc.getElementById("dn_address").textContent = site_address;
-    iframeDoc.getElementById("dn_client").textContent = client_and_address;
-    iframeDoc.getElementById("dn_veh_name").textContent = vehicle_name;
-    iframeDoc.getElementById("dn_veh_reg").textContent = vehicle_reg;
+    iframeDoc.getElementById("dn_address").textContent = siteAddress;
+    iframeDoc.getElementById("dn_client").textContent =
+        taxPayIdentNo === "" ? clientName : clientName + " NIP: " + taxPayIdentNo;
+    iframeDoc.getElementById("dn_veh_name").textContent = vehicleName;
+    iframeDoc.getElementById("dn_veh_reg").textContent = vehicleRegNo;
     iframeDoc.getElementById("dn_amount").textContent = amount;
-    iframeDoc.getElementById("dn_class").textContent = c_class;
+    iframeDoc.getElementById("dn_class").textContent = concreteClass;
     iframeDoc.getElementById("dn_time").textContent = time;
     iframeDoc.getElementById("dn_extras").textContent =
-        vehicle_type === "MIXER_PUMP" || vehicle_type === "PUMP" ? "Pompa" : "";
+        vehicleType === "MIXER_PUMP" || vehicleType === "PUMP" ? "Pompa" : "";
 
     iframeWindow.focus();
     iframeWindow.print();

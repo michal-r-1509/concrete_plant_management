@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class OrderMapper {
 
-    public Order newOrderDataValidating(OrderRequestDTO toSave, final Client client){
+    public Order newOrderDataValidating(OrderRequestDTO toSave, final Client client) {
         return Order.builder()
                 .date(toSave.getDate())
                 .time(toSave.getTime())
@@ -23,7 +23,7 @@ public class OrderMapper {
                 .build();
     }
 
-    public void existOrderDataValidating(OrderRequestDTO toSave, final Client client, final Order existOrder){
+    public void existOrderDataValidating(OrderRequestDTO toSave, final Client client, final Order existOrder) {
         existOrder.setDate(toSave.getDate());
         existOrder.setTime(toSave.getTime());
         existOrder.setAmount(toSave.getAmount());
@@ -34,23 +34,16 @@ public class OrderMapper {
         existOrder.setClient(client);
     }
 
-
-    public void newOrderDataValidating(Order order){
-        order.setAmount(amountValidating(order.getAmount()));
-    }
-
-    private double amountValidating(double amount){
-        return Math.min(Math.max(amount, 0.0), 1000.0);
-    }
-
     public OrderResponseDTO toResponse(final Order order) {
         return OrderResponseDTO.builder()
                 .id(order.getId())
                 .date(order.getDate())
                 .time(order.getTime())
                 .amount(order.getAmount())
+                .clientId(order.getClient().getId())
                 .clientName(order.getClient().getName())
                 .siteAddress(order.getSiteAddress())
+                .description(order.getDescription())
                 .pump(order.isPump())
                 .done(order.isDone())
                 .build();

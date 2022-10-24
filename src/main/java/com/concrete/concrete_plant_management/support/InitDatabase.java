@@ -1,13 +1,10 @@
 package com.concrete.concrete_plant_management.support;
 
 import com.concrete.concrete_plant_management.client.service.ClientService;
-import com.concrete.concrete_plant_management.domain.Client;
-import com.concrete.concrete_plant_management.domain.Order;
-import com.concrete.concrete_plant_management.domain.Vehicle;
-import com.concrete.concrete_plant_management.domain.VehicleSchedule;
+import com.concrete.concrete_plant_management.domain.*;
+import com.concrete.concrete_plant_management.order.schedule.ScheduleService;
 import com.concrete.concrete_plant_management.order.service.OrderService;
 import com.concrete.concrete_plant_management.vehicle.dto.VehicleRequestDTO;
-import com.concrete.concrete_plant_management.vehicle.service.VehicleScheduleService;
 import com.concrete.concrete_plant_management.vehicle.service.VehicleService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,7 +13,6 @@ import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -28,7 +24,6 @@ import java.util.Random;
 public class InitDatabase {
 
     private final VehicleService vehicleService;
-    private final VehicleScheduleService vehicleScheduleService;
     private final ClientService clientService;
     private final OrderService orderService;
 
@@ -37,23 +32,13 @@ public class InitDatabase {
 //    @Order(Ordered.LOWEST_PRECEDENCE)
     public void onStartup(ApplicationReadyEvent event) {
         initVehicles();
-        initSchedules();
         initClients();
         initOrders();
 
-        log.info("INITIALIZED DATABASE WITH DUMMY ENTITIES");
-    }
+        BatchFactory batchFactory = new BatchFactory();
+        orderService.saveOrUpdateBatches(1L, batchFactory.getBatches());
 
-    private void initSchedules() {
-        ScheduleFactory scheduleFactory = new ScheduleFactory();
-        List<VehicleSchedule> schedule = scheduleFactory.getSchedules();
-        List<Vehicle> vehicles = vehicleService.readAllVehicles();
-        for (int i = 0; i < vehicles.size(); i++) {
-            schedule.get(i * 2).setVehicle(vehicles.get(i));
-            schedule.get((i * 2) + 1).setVehicle(vehicles.get(i));
-            vehicleScheduleService.saveSchedule(schedule.get(i * 2));
-            vehicleScheduleService.saveSchedule(schedule.get((i * 2) + 1));
-        }
+        log.info("INITIALIZED DATABASE WITH DUMMY ENTITIES");
     }
 
     private void initVehicles() {

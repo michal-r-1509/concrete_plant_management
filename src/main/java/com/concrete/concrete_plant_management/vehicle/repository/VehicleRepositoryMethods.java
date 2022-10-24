@@ -14,4 +14,5 @@ public interface VehicleRepositoryMethods {
     boolean existsById(Long id);
     void deleteById(Long id);
     boolean existsByRegNo(String regNo);
+    boolean existsByRegNoAndIdIsNot(String regNo, Long id);
 }

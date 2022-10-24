@@ -1,9 +1,11 @@
 package com.concrete.concrete_plant_management.client.tool;
 
-public record PostCodeParser(String postCode) {
+import org.springframework.stereotype.Component;
 
-    @Override
-    public String toString() {
+@Component
+public record PostCodeParser() {
+
+    public String toString(String postCode) {
         if (postCode.length() < 5 || postCode.length() > 6){
             return "";
         }

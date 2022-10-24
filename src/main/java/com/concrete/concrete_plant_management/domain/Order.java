@@ -5,6 +5,8 @@ import lombok.*;
 import javax.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Builder
 @Getter
@@ -27,4 +29,7 @@ public class Order extends BaseEntity{
     @ManyToOne
     @JoinColumn(name = "client_id", referencedColumnName = "id")
     private Client client;
+
+    @OneToMany(mappedBy = "order", cascade = {CascadeType.REMOVE, CascadeType.REFRESH}, orphanRemoval = true)
+    private List<Batch> batches = new ArrayList<>();
 }
